@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tool Pricing Calculator</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f4f6f9; margin: 0; padding: 15px; color: #333; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        h2 { margin-top: 0; color: #1a365d; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; background-color: #3182ce; color: white; border: none; padding: 12px; font-size: 18px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        button:hover { background-color: #2b6cb0; }
+        .result-box { background-color: #ebf8ff; border-left: 4px solid #3182ce; padding: 15px; border-radius: 4px; margin-top: 20px; display: none; }
+        .result-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 15px; }
+        .total-row { font-weight: bold; font-size: 18px; border-top: 1px dashed #cbd5e0; padding-top: 8px; margin-top: 8px; color: #2c5282; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Resharpening & Coating Calculator</h2>
+    
+    <div class="form-group">
+        <label>Tool Category</label>
+        <select id="toolCategory" onchange="updateFluteOptions()">
+            <option value="flat">Flat / Radius Milling Cutter</option>
+            <option value="ballnose">Ball Nose Cutter</option>
+            <option value="drill">Drill Bit</option>
+            <option value="chamfer">Chamfering Knife</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Flutes</label>
+        <select id="flutes"></select>
+    </div>
+
+    <div class="form-group">
+        <label>Tool Material</label>
+        <select id="material">
+            <option value="carbide">Carbide Tool</option>
+            <option value="hss">HSS</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Coating Requirement</label>
+        <select id="coatingType" onchange="toggleLengthInput()">
+            <option value="NONE">No Coating (Resharpening Only)</option>
+            <option value="ALCRONA">BALINIT ALCRONA PRO / EVO (Base)</option>
+            <option value="HARD_CARBON">BALINIT HARD CARBON / MAYURA (1.3x)</option>
+            <option value="DURANA">BALINIT DURANA / OPTURA (1.3x)</option>
+            <option value="TISINOS">BALIQ TISINOS PRO (1.85x)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Actual Diameter (mm)</label>
+        <input type="number" id="diameter" placeholder="e.g. 10" step="any" min="3">
+    </div>
+
+    <div class="form-group" id="lengthGroup" style="display: none;">
+        <label>Total Length (mm)</label>
+        <input type="number" id="length" placeholder="e.g. 85" step="any" min="1">
+    </div>
+
+    <button onclick="calculateQuote()">Calculate Quote</button>
+
+    <div class="result-box" id="results">
+        <div class="result-row"><span>Resharpening Labor Cost:</span><span id="resCost">₹0.00</span></div>
+        <div class="result-row" id="coatBaseRow"><span>Coating Cost (Base):</span><span id="coatBase">₹0.00</span></div>
+        <div class="result-row" id="coatFinalRow"><span>Material Adj. Coating:</span><span id="coatFinal">₹0.00</span></div>
+        <div class="result-row total-row"><span>Subtotal:</span><span id="subtotal">₹0.00</span></div>
+        <div class="result-row"><span>GST (18%):</span><span id="gst">₹0.00</span></div>
+        <div class="result-row total-row" style="font-size:20px; color:#1a202c;"><span>Total Invoice Quote:</span><span id="grandTotal">₹0.00</span></div>
+    </div>
+</div>
+
+<script>
+// Coating Matrix Slabs from COATING PRICE LIST.xlsx
+const coatingDiameters = [3, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 26, 30, 32, 35, 40, 50];
+const coatingLengths = [50, 75, 100, 150, 200, 300, 400, 500];
+const coatingBasePrices = {
+    3: [71, 72, 109, 145, 356, 642, 751, 803],
+    4: [71, 72, 109, 145, 356, 642, 803, 903],
+    6: [83, 86, 129, 172, 356, 642, 803, 1183],
+    8: [103, 111, 159, 212, 356, 642, 803, 1334],
+    10: [134, 138, 206, 275, 356, 642, 803, 1459],
+    12: [161, 165, 248, 330, 356, 642, 803, 1558],
+    14: [201, 206, 309, 413, 446, 803, 1004, 1694],
+    16: [201, 206, 309, 413, 446, 803, 1004, 1895],
+    18: [268, 275, 413, 550, 714, 1284, 1605, 2071],
+    20: [268, 275, 413, 550, 714, 1284, 1605, 2353],
+    22: [335, 344, 516, 688, 891, 1605, 2006, 2673],
+    26: [446, 458, 688, 891, 917, 1605, 2006, 3079],
+    30: [446, 688, 1031, 1375, 1767, 2616, 3822, 4815],
+    32: [446, 688, 1031, 1375, 1784, 2796, 4013, 5053],
+    35: [516, 719, 1415, 1453, 1784, 2977, 4270, 6284],
+    40: [558, 1044, 1554, 2091, 1845, 3210, 4495, 7846],
+    50: [601, 1531, 1654, 3058, 3210, 3721, 4833, 13394]
+};
+
+// Resharpening Matrix setup from RESHARPENING PRICE LIST.xlsx
+function getResharpeningPrice(category, flutes, dia) {
+    const d = Math.ceil(dia);
+    if (category === 'flat') {
+        if (flutes <= 3) {
+            if (d <= 6) return 50; if (d <= 12) return 70; if (d <= 16) return 100; return 160;
+        } else {
+            if (d <= 6) return 55; if (d <= 12) return 75; if (d <= 16) return 110; return 170;
+        }
+    } else if (category === 'ballnose') {
+        if (d <= 6) return 60; if (d <= 12) return 80; if (d <= 16) return 110; return 170;
+    } else if (category === 'drill') {
+        if (d <= 4) return 20; if (d <= 8) return 30; if (d <= 14) return 40; return 50;
+    } else if (category === 'chamfer') {
+        if (flutes == 2) {
+            return d <= 10 ? 30 : 40;
+        } else {
+            return d <= 10 ? 40 : 50;
+        }
+    }
+    return 0;
+}
+
+function updateFluteOptions() {
+    const cat = document.getElementById("toolCategory").value;
+    const flutesSelect = document.getElementById("flutes");
+    flutesSelect.innerHTML = "";
+    
+    let options = [];
+    if (cat === 'flat') options = [2, 3, 4, 5, 6];
+    else if (cat === 'ballnose') options = [2, 4];
+    else if (cat === 'drill') options = [2];
+    else if (cat === 'chamfer') options = [2, 3];
+    
+    options.forEach(f => {
+        let opt = document.createElement("option");
+        opt.value = f; opt.innerText = f + " Flutes";
+        flutesSelect.appendChild(opt);
+    });
+}
+
+// Automatically hides the length input box if "No Coating" is selected
+function toggleLengthInput() {
+    const coating = document.getElementById("coatingType").value;
+    const lengthGroup = document.getElementById("lengthGroup");
+    if (coating === "NONE") {
+        lengthGroup.style.display = "none";
+    } else {
+        lengthGroup.style.display = "block";
+    }
+}
+
+function calculateQuote() {
+    const cat = document.getElementById("toolCategory").value;
+    const flutes = parseInt(document.getElementById("flutes").value);
+    const material = document.getElementById("material").value;
+    const coating = document.getElementById("coatingType").value;
+    const inputDia = parseFloat(document.getElementById("diameter").value);
+    const inputLen = parseFloat(document.getElementById("length").value);
+
+    if (isNaN(inputDia)) {
+        alert("Please enter a valid diameter parameter.");
+        return;
+    }
+    if (coating !== "NONE" && isNaN(inputLen)) {
+        alert("Please enter a valid tool length parameter for coating estimation.");
+        return;
+    }
+
+    // 1. Compute labor charge
+    const resharpeningCost = getResharpeningPrice(cat, flutes, inputDia);
+
+    let baseCoatingCost = 0;
+    let modifiedCoatingCost = 0;
+
+    // 2. Only run coating logic if option isn't "NONE"
+    if (coating !== "NONE") {
+        let finalDiaSlab = coatingDiameters.find(d => d >= inputDia);
+        let finalLenSlab = coatingLengths.find(l => l >= inputLen);
+
+        if (!finalDiaSlab) finalDiaSlab = 50;
+        if (!finalLenSlab) finalLenSlab = 500;
+
+        const lenIndex = coatingLengths.indexOf(finalLenSlab);
+        baseCoatingCost = coatingBasePrices[finalDiaSlab][lenIndex];
+
+        // 3. Multiplier for Technology Coating
+        let coatingMultiplier = 1.0;
+        if (coating === "HARD_CARBON" || coating === "DURANA") coatingMultiplier = 1.30;
+        else if (coating === "TISINOS") coatingMultiplier = 1.85;
+
+        modifiedCoatingCost = baseCoatingCost * coatingMultiplier;
+
+        // 4. Material Factor Rule (HSS 20% Discount)
+        if (material === "hss") {
+            modifiedCoatingCost *= 0.80;
+        }
+        
+        // Ensure coating rows are visible
+        document.getElementById("coatBaseRow").style.display = "flex";
+        document.getElementById("coatFinalRow").style.display = "flex";
+    } else {
+        // Hide coating visual data elements if zero
+        document.getElementById("coatBaseRow").style.display = "none";
+        document.getElementById("coatFinalRow").style.display = "none";
+    }
+
+    // 5. Aggregate Financial Blocks
+    const subtotal = resharpeningCost + modifiedCoatingCost;
+    const gst = subtotal * 0.18;
+    const grandTotal = subtotal + gst;
+
+    // Render results view
+    document.getElementById("resCost").innerText = "₹" + resharpeningCost.toFixed(2);
+    document.getElementById("coatBase").innerText = "₹" + baseCoatingCost.toFixed(2);
+    document.getElementById("coatFinal").innerText = "₹" + modifiedCoatingCost.toFixed(2);
+    document.getElementById("subtotal").innerText = "₹" + subtotal.toFixed(2);
+    document.getElementById("gst").innerText = "₹" + gst.toFixed(2);
+    document.getElementById("grandTotal").innerText = "₹" + grandTotal.toFixed(2);
+    document.getElementById("results").style.display = "block";
+}
+
+// Set default choices on load
+updateFluteOptions();
+toggleLengthInput();
+</script>
+</body>
+</html>
