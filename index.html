@@ -3,84 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tool Pricing Calculator</title>
+    <title>Tool Pricing & Recommendation Calculator</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f4f6f9; margin: 0; padding: 15px; color: #333; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
-        h2 { margin-top: 0; color: #1a365d; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .container { max-width: 500px; margin: auto; display: flex; flex-direction: column; gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; color: #1a365d; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; font-size: 20px; display: flex; align-items: center; gap: 8px;}
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; background-color: #3182ce; color: white; border: none; padding: 12px; font-size: 18px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; font-size: 16px; background-color: #fff; }
+        button { width: 100%; background-color: #3182ce; color: white; border: none; padding: 12px; font-size: 18px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 5px; }
         button:hover { background-color: #2b6cb0; }
+
+        /* Recommendation helper styles */
+        .rec-box { background-color: #f0fff4; border-left: 4px solid #38a169; padding: 12px; border-radius: 6px; margin-top: 10px; font-size: 14px; display: none; }
+        .rec-title { font-weight: bold; color: #276749; margin-bottom: 4px; font-size: 15px;}
+
+        /* Results output styles */
         .result-box { background-color: #ebf8ff; border-left: 4px solid #3182ce; padding: 15px; border-radius: 4px; margin-top: 20px; display: none; }
         .result-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 15px; }
         .total-row { font-weight: bold; font-size: 18px; border-top: 1px dashed #cbd5e0; padding-top: 8px; margin-top: 8px; color: #2c5282; }
+        .muted-row { color: #718096; font-size: 13px; }
+
+        /* Limit warning */
+        .limit-warning { background-color: #fff5f5; border-left: 4px solid #e53e3e; color: #9b2c2c; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 14px; display: none; }
+
+        /* Half-width row layout */
+        .form-row { display: flex; gap: 10px; }
+        .form-row .form-group { flex: 1; margin-bottom: 15px; }
+
+        /* Reset button styling */
+        .reset-button { background-color: #e2e8f0; color: #2d3748; margin-top: 10px; }
+        .reset-button:hover { background-color: #cbd5e0; }
+
+        /* Confirm order button */
+        .confirm-button { background-color: #38a169; margin-top: 12px; display: none; }
+        .confirm-button:hover { background-color: #2f855a; }
+        .confirm-button:disabled { background-color: #9ae6b4; cursor: not-allowed; }
+
+        /* Sheet sync status message */
+        .sheet-status { margin-top: 10px; padding: 10px; border-radius: 6px; font-size: 14px; display: none; }
+        .sheet-status.sending { background-color: #ebf8ff; color: #2c5282; border-left: 4px solid #3182ce; }
+        .sheet-status.success { background-color: #f0fff4; color: #276749; border-left: 4px solid #38a169; }
+        .sheet-status.error { background-color: #fff5f5; color: #9b2c2c; border-left: 4px solid #e53e3e; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Resharpening & Coating Calculator</h2>
-    
-    <div class="form-group">
-        <label>Tool Category</label>
-        <select id="toolCategory" onchange="updateFluteOptions()">
-            <option value="flat">Flat / Radius Milling Cutter</option>
-            <option value="ballnose">Ball Nose Cutter</option>
-            <option value="drill">Drill Bit</option>
-            <option value="chamfer">Chamfering Knife</option>
-        </select>
+<div class="container">
+
+    <!-- CARD 1: INTELLIGENT RECOMMENDATION HELPER -->
+    <div class="card">
+        <h2>🎯 Which Coating Do I Need?</h2>
+
+        <div class="form-group">
+            <label>Customer Name</label>
+            <input type="text" id="customerName" placeholder="e.g. Patel Engineering">
+        </div>
+
+        <div class="form-group">
+            <label>Contact Number</label>
+            <input type="tel" id="customerContact" inputmode="tel" placeholder="e.g. 9876543210">
+        </div>
+
+        <div class="form-group">
+            <label>What is the customer's workpiece material/job?</label>
+            <select id="workpieceMaterial" onchange="getRecommendation()">
+                <option value="">-- Tap to choose workpiece requirement --</option>
+                <option value="hardened_high">Hardened Steel / High-Temp Alloys (Up to 70 HRC)</option>
+                <option value="stainless">Stainless Steel / Tough Steels</option>
+                <option value="aluminium">Aluminium & Alloys (&lt;12% Si) / Copper / Brass</option>
+                <option value="drilling_steel">General Drilling / Deep-Hole Steel Drilling</option>
+                <option value="universal">General Purpose / Allrounder (Milling & Turning)</option>
+                <option value="hardened_drills_reamers">Hardened Steel – Stick Blades / Drills / Reamers (45–72 HRC)</option>
+            </select>
+        </div>
+
+        <div class="rec-box" id="recDisplay">
+            <div class="rec-title" id="recTargetCoating">Recommended Choice: -</div>
+            <div id="recDescription">-</div>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Flutes</label>
-        <select id="flutes"></select>
+    <!-- CARD 2: MAIN PRICING CALCULATOR -->
+    <div class="card">
+        <h2>📐 Quote & Dimension Settings</h2>
+
+        <div class="form-group">
+            <label>Tool Category</label>
+            <select id="toolCategory" onchange="updateFluteOptions()">
+                <option value="flat">Flat / Radius Milling Cutter</option>
+                <option value="ballnose">Ball Nose Cutter</option>
+                <option value="drill">Drill Bit</option>
+                <option value="chamfer">Chamfering Knife</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Flutes</label>
+            <select id="flutes"></select>
+        </div>
+
+        <div class="form-group">
+            <label>Tool Substrate Material</label>
+            <select id="material">
+                <option value="carbide">Solid Carbide Tool</option>
+                <option value="hss">HSS (20% Coating Discount applied)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Coating Layer Selection</label>
+            <select id="coatingType" onchange="toggleLengthInput()">
+                <option value="NONE">No Coating (Resharpening Only)</option>
+                <option value="ALCRONA">BALINIT ALCRONA PRO / EVO (Base)</option>
+                <option value="HARD_CARBON">BALINIT HARD CARBON / MAYURA (1.3x Rate)</option>
+                <option value="DURANA">BALINIT DURANA / OPTURA (1.3x Rate)</option>
+                <option value="TISINOS">BALIQ TISINOS PRO (1.85x Rate)</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Diameter (mm) — Max 20mm</label>
+                <input type="number" id="diameter" inputmode="decimal" placeholder="e.g. 12" step="any" min="3" max="20">
+            </div>
+            <div class="form-group">
+                <label>Quantity</label>
+                <input type="number" id="quantity" inputmode="numeric" placeholder="e.g. 1" step="1" min="1" value="1">
+            </div>
+        </div>
+
+        <div class="form-group" id="lengthGroup" style="display: none;">
+            <label>Total Length (mm)</label>
+            <input type="number" id="length" inputmode="decimal" placeholder="e.g. 75" step="any" min="1">
+        </div>
+
+        <div class="limit-warning" id="limitWarning"></div>
+
+        <button onclick="calculateQuote()">Calculate Invoice Price</button>
+        <button class="reset-button" onclick="resetForm()">↺ Reset / New Quote</button>
+
+        <div class="result-box" id="results">
+            <div class="result-row muted-row" id="qtyRow"><span>Quantity:</span><span id="qtyDisplay">1</span></div>
+            <div class="result-row"><span>Resharpening (Total):</span><span id="resCost">₹0.00</span></div>
+            <div class="result-row" id="coatBaseRow"><span>Coating Grid Price (Per Tool):</span><span id="coatBase">₹0.00</span></div>
+            <div class="result-row" id="coatFinalRow"><span>Coating Fee (Total):</span><span id="coatFinal">₹0.00</span></div>
+            <div class="result-row total-row"><span>Subtotal Amount:</span><span id="subtotal">₹0.00</span></div>
+            <div class="result-row"><span>GST (18%):</span><span id="gst">₹0.00</span></div>
+            <div class="result-row muted-row"><span>Round Off:</span><span id="roundOff">₹0.00</span></div>
+            <div class="result-row total-row" style="font-size:20px; color:#1a202c;"><span>Total Grand Bill:</span><span id="grandTotal">₹0.00</span></div>
+        </div>
+
+        <button class="confirm-button" id="confirmBtn" onclick="confirmOrder()">✅ Confirm Order</button>
+        <div class="sheet-status" id="sheetStatus"></div>
     </div>
 
-    <div class="form-group">
-        <label>Tool Material</label>
-        <select id="material">
-            <option value="carbide">Carbide Tool</option>
-            <option value="hss">HSS</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>Coating Requirement</label>
-        <select id="coatingType" onchange="toggleLengthInput()">
-            <option value="NONE">No Coating (Resharpening Only)</option>
-            <option value="ALCRONA">BALINIT ALCRONA PRO / EVO (Base)</option>
-            <option value="HARD_CARBON">BALINIT HARD CARBON / MAYURA (1.3x)</option>
-            <option value="DURANA">BALINIT DURANA / OPTURA (1.3x)</option>
-            <option value="TISINOS">BALIQ TISINOS PRO (1.85x)</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>Actual Diameter (mm)</label>
-        <input type="number" id="diameter" placeholder="e.g. 10" step="any" min="3">
-    </div>
-
-    <div class="form-group" id="lengthGroup" style="display: none;">
-        <label>Total Length (mm)</label>
-        <input type="number" id="length" placeholder="e.g. 85" step="any" min="1">
-    </div>
-
-    <button onclick="calculateQuote()">Calculate Quote</button>
-
-    <div class="result-box" id="results">
-        <div class="result-row"><span>Resharpening Labor Cost:</span><span id="resCost">₹0.00</span></div>
-        <div class="result-row" id="coatBaseRow"><span>Coating Cost (Base):</span><span id="coatBase">₹0.00</span></div>
-        <div class="result-row" id="coatFinalRow"><span>Material Adj. Coating:</span><span id="coatFinal">₹0.00</span></div>
-        <div class="result-row total-row"><span>Subtotal:</span><span id="subtotal">₹0.00</span></div>
-        <div class="result-row"><span>GST (18%):</span><span id="gst">₹0.00</span></div>
-        <div class="result-row total-row" style="font-size:20px; color:#1a202c;"><span>Total Invoice Quote:</span><span id="grandTotal">₹0.00</span></div>
-    </div>
 </div>
 
 <script>
-// Coating Matrix Slabs from COATING PRICE LIST.xlsx
+// ===== GOOGLE SHEET INTEGRATION =====
+// Paste your deployed Google Apps Script Web App URL here (see setup notes at bottom of this file).
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxo7k0nB_IrqI1cjYY9fhoqlB6f2GIUnKCwZBZ8iQNLfBSbl6oi-Dhw_DM1ZJ6Xio_Avw/exec";
+
+// Holds the data for the most recently calculated quote, used by Confirm Order
+let lastQuoteData = null;
+
+// Resharpening machine capacity limit
+const MAX_RESHARPEN_DIA = 20;
+
+// Coating Matrix Slabs
 const coatingDiameters = [3, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 26, 30, 32, 35, 40, 50];
 const coatingLengths = [50, 75, 100, 150, 200, 300, 400, 500];
 const coatingBasePrices = {
@@ -99,11 +191,62 @@ const coatingBasePrices = {
     30: [446, 688, 1031, 1375, 1767, 2616, 3822, 4815],
     32: [446, 688, 1031, 1375, 1784, 2796, 4013, 5053],
     35: [516, 719, 1415, 1453, 1784, 2977, 4270, 6284],
-    40: [558, 1044, 1554, 2091, 1845, 3210, 4495, 7846],
+    40: [558, 1044, 1554, 1845, 2091, 3210, 4495, 7846], // FIXED: 150mm/200mm values were swapped
     50: [601, 1531, 1654, 3058, 3210, 3721, 4833, 13394]
 };
 
-// Resharpening Matrix setup from RESHARPENING PRICE LIST.xlsx
+// Fixed Application Assistant Logic
+function getRecommendation() {
+    const material = document.getElementById("workpieceMaterial").value;
+    const recDisplay = document.getElementById("recDisplay");
+    const targetCoating = document.getElementById("recTargetCoating");
+    const description = document.getElementById("recDescription");
+    const mainCoatingSelector = document.getElementById("coatingType");
+
+    if (!material) {
+        recDisplay.style.display = "none";
+        return;
+    }
+
+    recDisplay.style.display = "block";
+
+    switch(material) {
+        case "hardened_high":
+            targetCoating.innerText = "⭐ BALIQ TISINOS PRO";
+            description.innerText = "Best choice for high-precision hard machining up to 70 HRC, hardened steel, and high-temp alloys. Built to handle heavy thermal load stress.";
+            mainCoatingSelector.value = "TISINOS";
+            break;
+        case "stainless":
+            targetCoating.innerText = "⭐ BALIQ TISINOS PRO / ALCRONA EVO";
+            description.innerText = "TISINOS PRO is ideal for high-reliability stainless steel cutting (drills, reamers, end mills). For general stainless milling/turning, ALCRONA EVO is the solid second option.";
+            mainCoatingSelector.value = "TISINOS";
+            break;
+        case "aluminium":
+            targetCoating.innerText = "⭐ BALINIT MAYURA (ta-C)";
+            description.innerText = "Premium choice for Aluminium alloys (< 12% Silicon), Copper, Brass, and Polymers. Extremely smooth carbon surface prevents material adhesion and chip welding.";
+            mainCoatingSelector.value = "HARD_CARBON";
+            break;
+        case "drilling_steel":
+            targetCoating.innerText = "⭐ BALINIT OPTURA";
+            description.innerText = "Engineered specifically for steel and cast iron drilling, deep-hole drilling, and reaming. Multilayer architecture optimizes wear resistance and borehole finish.";
+            mainCoatingSelector.value = "DURANA";
+            break;
+        case "universal":
+            targetCoating.innerText = "⭐ BALINIT ALCRONA PRO / EVO";
+            description.innerText = "Your classic universal all-rounder. High wear and crater resistance across a broad range of standard milling and turning jobs.";
+            mainCoatingSelector.value = "ALCRONA";
+            break;
+        case "hardened_drills_reamers":
+            targetCoating.innerText = "⭐ BALINIT DURANA";
+            description.innerText = "Suited for stick blades, drills, and reamers in hardened steel (45–72 HRC). Not for abrasive non-metals like graphite/composites/ceramics.";
+            mainCoatingSelector.value = "DURANA";
+            break;
+    }
+
+    toggleLengthInput();
+}
+
+// Resharpening Base Price Determination
 function getResharpeningPrice(category, flutes, dia) {
     const d = Math.ceil(dia);
     if (category === 'flat') {
@@ -129,22 +272,27 @@ function getResharpeningPrice(category, flutes, dia) {
 function updateFluteOptions() {
     const cat = document.getElementById("toolCategory").value;
     const flutesSelect = document.getElementById("flutes");
+
+    const currentSelectedValue = flutesSelect.value;
     flutesSelect.innerHTML = "";
-    
+
     let options = [];
     if (cat === 'flat') options = [2, 3, 4, 5, 6];
     else if (cat === 'ballnose') options = [2, 4];
     else if (cat === 'drill') options = [2];
     else if (cat === 'chamfer') options = [2, 3];
-    
+
     options.forEach(f => {
         let opt = document.createElement("option");
         opt.value = f; opt.innerText = f + " Flutes";
         flutesSelect.appendChild(opt);
     });
+
+    if (options.includes(parseInt(currentSelectedValue))) {
+        flutesSelect.value = currentSelectedValue;
+    }
 }
 
-// Automatically hides the length input box if "No Coating" is selected
 function toggleLengthInput() {
     const coating = document.getElementById("coatingType").value;
     const lengthGroup = document.getElementById("lengthGroup");
@@ -157,11 +305,17 @@ function toggleLengthInput() {
 
 function calculateQuote() {
     const cat = document.getElementById("toolCategory").value;
-    const flutes = parseInt(document.getElementById("flutes").value);
+    const flutes = parseInt(document.getElementById("flutes").value || 2);
     const material = document.getElementById("material").value;
     const coating = document.getElementById("coatingType").value;
     const inputDia = parseFloat(document.getElementById("diameter").value);
     const inputLen = parseFloat(document.getElementById("length").value);
+    const inputQty = parseInt(document.getElementById("quantity").value);
+    const limitWarning = document.getElementById("limitWarning");
+    limitWarning.style.display = "none";
+    document.getElementById("confirmBtn").style.display = "none";
+    document.getElementById("sheetStatus").style.display = "none";
+    lastQuoteData = null;
 
     if (isNaN(inputDia)) {
         alert("Please enter a valid diameter parameter.");
@@ -171,14 +325,23 @@ function calculateQuote() {
         alert("Please enter a valid tool length parameter for coating estimation.");
         return;
     }
+    if (isNaN(inputQty) || inputQty < 1) {
+        alert("Please enter a valid quantity (minimum 1).");
+        return;
+    }
 
-    // 1. Compute labor charge
-    const resharpeningCost = getResharpeningPrice(cat, flutes, inputDia);
+    // Machine capacity cap - resharpening machine cannot handle above 20mm
+    if (inputDia > MAX_RESHARPEN_DIA) {
+        limitWarning.innerText = "⚠ Diameter exceeds your machine's resharpening capacity (max " + MAX_RESHARPEN_DIA + "mm). This tool cannot be quoted on this calculator.";
+        limitWarning.style.display = "block";
+        document.getElementById("results").style.display = "none";
+        return;
+    }
 
+    const resharpeningUnitCost = getResharpeningPrice(cat, flutes, inputDia);
     let baseCoatingCost = 0;
-    let modifiedCoatingCost = 0;
+    let modifiedCoatingUnitCost = 0;
 
-    // 2. Only run coating logic if option isn't "NONE"
     if (coating !== "NONE") {
         let finalDiaSlab = coatingDiameters.find(d => d >= inputDia);
         let finalLenSlab = coatingLengths.find(l => l >= inputLen);
@@ -189,45 +352,201 @@ function calculateQuote() {
         const lenIndex = coatingLengths.indexOf(finalLenSlab);
         baseCoatingCost = coatingBasePrices[finalDiaSlab][lenIndex];
 
-        // 3. Multiplier for Technology Coating
         let coatingMultiplier = 1.0;
         if (coating === "HARD_CARBON" || coating === "DURANA") coatingMultiplier = 1.30;
         else if (coating === "TISINOS") coatingMultiplier = 1.85;
 
-        modifiedCoatingCost = baseCoatingCost * coatingMultiplier;
+        modifiedCoatingUnitCost = baseCoatingCost * coatingMultiplier;
 
-        // 4. Material Factor Rule (HSS 20% Discount)
         if (material === "hss") {
-            modifiedCoatingCost *= 0.80;
+            modifiedCoatingUnitCost *= 0.80;
         }
-        
-        // Ensure coating rows are visible
+
         document.getElementById("coatBaseRow").style.display = "flex";
         document.getElementById("coatFinalRow").style.display = "flex";
     } else {
-        // Hide coating visual data elements if zero
         document.getElementById("coatBaseRow").style.display = "none";
         document.getElementById("coatFinalRow").style.display = "none";
     }
 
-    // 5. Aggregate Financial Blocks
-    const subtotal = resharpeningCost + modifiedCoatingCost;
-    const gst = subtotal * 0.18;
-    const grandTotal = subtotal + gst;
+    const totalResharpeningCost = resharpeningUnitCost * inputQty;
+    const totalCoatingCost = modifiedCoatingUnitCost * inputQty;
 
-    // Render results view
-    document.getElementById("resCost").innerText = "₹" + resharpeningCost.toFixed(2);
+    const subtotal = totalResharpeningCost + totalCoatingCost;
+    const gst = subtotal * 0.18;
+    const grandTotalRaw = subtotal + gst;
+    const grandTotalRounded = Math.round(grandTotalRaw);
+    const roundOff = grandTotalRounded - grandTotalRaw;
+
+    document.getElementById("qtyDisplay").innerText = inputQty;
+    document.getElementById("resCost").innerText = "₹" + totalResharpeningCost.toFixed(2);
     document.getElementById("coatBase").innerText = "₹" + baseCoatingCost.toFixed(2);
-    document.getElementById("coatFinal").innerText = "₹" + modifiedCoatingCost.toFixed(2);
+    document.getElementById("coatFinal").innerText = "₹" + totalCoatingCost.toFixed(2);
     document.getElementById("subtotal").innerText = "₹" + subtotal.toFixed(2);
     document.getElementById("gst").innerText = "₹" + gst.toFixed(2);
-    document.getElementById("grandTotal").innerText = "₹" + grandTotal.toFixed(2);
+    document.getElementById("roundOff").innerText = (roundOff >= 0 ? "+₹" : "-₹") + Math.abs(roundOff).toFixed(2);
+    document.getElementById("grandTotal").innerText = "₹" + grandTotalRounded.toFixed(2);
     document.getElementById("results").style.display = "block";
+
+    // Capture everything needed for the Confirm Order -> Google Sheet sync
+    const now = new Date();
+    const toolCategorySelect = document.getElementById("toolCategory");
+    const materialSelect = document.getElementById("material");
+    const coatingSelect = document.getElementById("coatingType");
+    const customerName = document.getElementById("customerName").value.trim();
+    const customerContact = document.getElementById("customerContact").value.trim();
+
+    lastQuoteData = {
+        customerName: customerName || "(No name entered)",
+        customerContact: customerContact || "(No contact entered)",
+        date: now.toLocaleDateString("en-IN"),
+        time: now.toLocaleTimeString("en-IN"),
+        toolCategory: toolCategorySelect.options[toolCategorySelect.selectedIndex].text,
+        flutes: flutes,
+        material: materialSelect.options[materialSelect.selectedIndex].text,
+        coating: coatingSelect.options[coatingSelect.selectedIndex].text,
+        diameter: inputDia,
+        quantity: inputQty,
+        totalLength: coating !== "NONE" ? inputLen : "N/A",
+        resharpeningTotal: totalResharpeningCost.toFixed(2),
+        coatingTotal: totalCoatingCost.toFixed(2),
+        grandTotal: grandTotalRounded.toFixed(2)
+    };
+
+    document.getElementById("confirmBtn").style.display = "block";
+    document.getElementById("sheetStatus").style.display = "none";
 }
 
-// Set default choices on load
+function confirmOrder() {
+    if (!lastQuoteData) {
+        alert("Please calculate a quote first.");
+        return;
+    }
+    if (GOOGLE_SCRIPT_URL.includes("PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE")) {
+        alert("Google Sheet link isn't set up yet. See the setup instructions at the bottom of this file's source code.");
+        return;
+    }
+
+    const confirmBtn = document.getElementById("confirmBtn");
+    const sheetStatus = document.getElementById("sheetStatus");
+
+    confirmBtn.disabled = true;
+    confirmBtn.innerText = "Sending...";
+    sheetStatus.className = "sheet-status sending";
+    sheetStatus.innerText = "Saving order to Google Sheet...";
+    sheetStatus.style.display = "block";
+
+    fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(lastQuoteData)
+    })
+    .then(() => {
+        // mode:no-cors means we can't read the actual response,
+        // so a successful fetch (no network error) is treated as success.
+        sheetStatus.className = "sheet-status success";
+        sheetStatus.innerText = "✅ Order saved for " + lastQuoteData.customerName + ".";
+        confirmBtn.innerText = "✅ Order Confirmed";
+    })
+    .catch(() => {
+        sheetStatus.className = "sheet-status error";
+        sheetStatus.innerText = "⚠ Could not reach Google Sheet. Check your internet connection or the script URL.";
+        confirmBtn.disabled = false;
+        confirmBtn.innerText = "✅ Confirm Order";
+    });
+}
+
+function resetForm() {
+    document.getElementById("customerName").value = "";
+    document.getElementById("customerContact").value = "";
+    document.getElementById("workpieceMaterial").value = "";
+    document.getElementById("recDisplay").style.display = "none";
+
+    document.getElementById("toolCategory").value = "flat";
+    updateFluteOptions();
+
+    document.getElementById("material").value = "carbide";
+    document.getElementById("coatingType").value = "NONE";
+    toggleLengthInput();
+
+    document.getElementById("diameter").value = "";
+    document.getElementById("length").value = "";
+    document.getElementById("quantity").value = "1";
+
+    document.getElementById("limitWarning").style.display = "none";
+    document.getElementById("results").style.display = "none";
+
+    const confirmBtn = document.getElementById("confirmBtn");
+    confirmBtn.style.display = "none";
+    confirmBtn.disabled = false;
+    confirmBtn.innerText = "✅ Confirm Order";
+    document.getElementById("sheetStatus").style.display = "none";
+    lastQuoteData = null;
+}
+
+// Initial Bootup Sequence
 updateFluteOptions();
 toggleLengthInput();
 </script>
+
+<!--
+============================================================
+GOOGLE SHEET SETUP INSTRUCTIONS (one-time setup)
+============================================================
+
+1. Create (or open) a Google Sheet for your order log.
+   In Row 1, add these column headers exactly in this order:
+   Customer Name | Contact Number | Date | Time | Tool Category | Flutes |
+   Material | Coating | Diameter (mm) | Quantity | Total Length (mm) |
+   Resharpening Total | Coating Total | Grand Bill
+
+2. In that Sheet, go to Extensions > Apps Script.
+   Delete any starter code and paste this:
+
+   function doPost(e) {
+     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+     var data = JSON.parse(e.postData.contents);
+     sheet.appendRow([
+       data.customerName,
+       data.customerContact,
+       data.date,
+       data.time,
+       data.toolCategory,
+       data.flutes,
+       data.material,
+       data.coating,
+       data.diameter,
+       data.quantity,
+       data.totalLength,
+       data.resharpeningTotal,
+       data.coatingTotal,
+       data.grandTotal
+     ]);
+     return ContentService.createTextOutput(JSON.stringify({status: "success"}))
+       .setMimeType(ContentService.MimeType.JSON);
+   }
+
+3. Click Deploy > New deployment.
+   - Select type: Web app
+   - Execute as: Me
+   - Who has access: Anyone
+   Click Deploy, and authorize the permissions it asks for.
+
+4. Copy the "Web app URL" it gives you.
+
+5. Back in this HTML file, find this line near the top of the <script> tag:
+   const GOOGLE_SCRIPT_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+   Replace the placeholder text with the URL you copied (keep the quotes).
+
+6. Save the file. The Confirm Order button will now write a new row
+   to your Google Sheet every time it's pressed.
+
+Note: every time you edit the Apps Script code itself later, you must
+create a "New deployment" again (or manage existing deployment > edit)
+for the changes to take effect on the same URL.
+============================================================
+-->
+
 </body>
 </html>
