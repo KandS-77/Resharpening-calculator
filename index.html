@@ -560,14 +560,29 @@ function closeShareModal(event) {
 
 function shareViaWhatsApp() {
     const contact = (lastQuoteData.customerContact || "").replace(/[^0-9]/g, "");
-    let url;
-    if (contact.length === 10) {
-        // Assumes India (+91). Adjust the country code below if needed.
-        url = "https://wa.me/91" + contact + "?text=" + encodeURIComponent(pendingShareText);
-    } else {
-        url = "https://wa.me/?text=" + encodeURIComponent(pendingShareText);
-    }
-    window.location.href = url;
+    const fullNumber = contact.length === 10 ? "91" + contact : "";
+
+    // Custom app scheme - more likely to trigger a native app intent
+    // than https://wa.me inside a restrictive WebView wrapper.
+    const schemeUrl = "whatsapp://send?" + (fullNumber ? "phone=" + fullNumber + "&" : "") + "text=" + encodeURIComponent(pendingShareText);
+
+    const start = Date.now();
+    window.location.href = schemeUrl;
+
+    // Safety net: if we're still here (WhatsApp app didn't open) after 1.5s,
+    // assume the WebView blocked the handoff and fall back to clipboard copy.
+    setTimeout(() => {
+        if (document.hasFocus() && Date.now() - start < 4000) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(pendingShareText).then(() => {
+                    alert("Couldn't open WhatsApp directly from here. The quote has been copied — please open WhatsApp yourself and paste it into the chat.");
+                });
+            } else {
+                alert("Couldn't open WhatsApp directly from here. Please use 'Copy Text' instead, then paste it into WhatsApp manually.");
+            }
+        }
+    }, 1500);
+
     closeShareModal();
 }
 
