@@ -567,7 +567,7 @@ function shareViaWhatsApp() {
     } else {
         url = "https://wa.me/?text=" + encodeURIComponent(pendingShareText);
     }
-    window.open(url, "_blank");
+    window.location.href = url;
     closeShareModal();
 }
 
