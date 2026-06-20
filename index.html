@@ -50,6 +50,35 @@
         .sheet-status.sending { background-color: #ebf8ff; color: #2c5282; border-left: 4px solid #3182ce; }
         .sheet-status.success { background-color: #f0fff4; color: #276749; border-left: 4px solid #38a169; }
         .sheet-status.error { background-color: #fff5f5; color: #9b2c2c; border-left: 4px solid #e53e3e; }
+
+        /* Share options modal (fallback for environments without native share sheet) */
+        .share-modal-backdrop {
+            display: none;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        .share-modal-backdrop.visible { display: flex; }
+        .share-modal-box {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 16px 16px 0 0;
+            padding: 20px;
+            box-sizing: border-box;
+            animation: slideUp 0.2s ease-out;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .share-modal-box h3 { margin: 0 0 15px 0; color: #1a365d; text-align: center; }
+        .share-option-btn {
+            width: 100%; text-align: left; padding: 14px 16px; margin-bottom: 8px;
+            border: 1px solid #e2e8f0; border-radius: 8px; background: #f7fafc;
+            color: #2d3748; font-size: 16px; font-weight: normal;
+        }
+        .share-option-btn:hover { background: #edf2f7; }
+        .cancel-btn { background: #fff; color: #e53e3e; text-align: center; border: none; margin-top: 8px; }
     </style>
 </head>
 <body>
@@ -172,6 +201,18 @@
 
 </div>
 
+<!-- SHARE OPTIONS MODAL (used when native share sheet isn't available, e.g. inside app-wrapper WebViews) -->
+<div class="share-modal-backdrop" id="shareModalBackdrop" onclick="closeShareModal(event)">
+    <div class="share-modal-box" onclick="event.stopPropagation()">
+        <h3>Share Quote Via</h3>
+        <button class="share-option-btn whatsapp-btn" onclick="shareViaWhatsApp()">🟢 WhatsApp</button>
+        <button class="share-option-btn sms-btn" onclick="shareViaSMS()">💬 SMS / Messages</button>
+        <button class="share-option-btn email-btn" onclick="shareViaEmail()">📧 Email</button>
+        <button class="share-option-btn copy-btn" onclick="shareViaCopy()">📋 Copy Text</button>
+        <button class="share-option-btn cancel-btn" onclick="closeShareModal()">Cancel</button>
+    </div>
+</div>
+
 <script>
 // ===== GOOGLE SHEET INTEGRATION =====
 // Paste your deployed Google Apps Script Web App URL here (see setup notes at bottom of this file).
@@ -179,6 +220,9 @@ const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxo7k0nB_IrqI
 
 // Holds the data for the most recently calculated quote, used by Confirm Order
 let lastQuoteData = null;
+
+// Holds the quote text currently queued for sharing via the fallback modal
+let pendingShareText = null;
 
 // Resharpening machine capacity limit
 const MAX_RESHARPEN_DIA = 20;
@@ -495,22 +539,64 @@ function shareQuote() {
             title: "Quotation for " + lastQuoteData.customerName,
             text: quoteText
         }).catch(() => {
-            // User cancelled the share sheet - no action needed
-        });
-    } else if (navigator.clipboard) {
-        navigator.clipboard.writeText(quoteText).then(() => {
-            alert("Quote copied to clipboard! Paste it into WhatsApp or any chat app to send it.");
-        }).catch(() => {
-            openWhatsAppFallback(quoteText);
+            // User cancelled the native share sheet - no action needed
         });
     } else {
-        openWhatsAppFallback(quoteText);
+        // Native share sheet isn't available here (common inside app-wrapper
+        // WebViews like Alpha). Show our own menu with direct app buttons instead.
+        openShareModal(quoteText);
     }
 }
 
-function openWhatsAppFallback(quoteText) {
-    const url = "https://wa.me/?text=" + encodeURIComponent(quoteText);
+function openShareModal(quoteText) {
+    pendingShareText = quoteText;
+    document.getElementById("shareModalBackdrop").classList.add("visible");
+}
+
+function closeShareModal(event) {
+    if (event && event.target !== document.getElementById("shareModalBackdrop")) return;
+    document.getElementById("shareModalBackdrop").classList.remove("visible");
+}
+
+function shareViaWhatsApp() {
+    const contact = (lastQuoteData.customerContact || "").replace(/[^0-9]/g, "");
+    let url;
+    if (contact.length === 10) {
+        // Assumes India (+91). Adjust the country code below if needed.
+        url = "https://wa.me/91" + contact + "?text=" + encodeURIComponent(pendingShareText);
+    } else {
+        url = "https://wa.me/?text=" + encodeURIComponent(pendingShareText);
+    }
     window.open(url, "_blank");
+    closeShareModal();
+}
+
+function shareViaSMS() {
+    const contact = (lastQuoteData.customerContact || "").replace(/[^0-9]/g, "");
+    // iOS uses "&body=", Android uses "?body=" - this format works on most Android devices.
+    const url = "sms:" + (contact.length === 10 ? contact : "") + "?body=" + encodeURIComponent(pendingShareText);
+    window.location.href = url;
+    closeShareModal();
+}
+
+function shareViaEmail() {
+    const subject = "Quotation - " + lastQuoteData.customerName;
+    const url = "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(pendingShareText);
+    window.location.href = url;
+    closeShareModal();
+}
+
+function shareViaCopy() {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(pendingShareText).then(() => {
+            alert("Quote copied to clipboard! Paste it wherever you'd like to send it.");
+        }).catch(() => {
+            alert("Could not copy automatically. Please select and copy the text manually.");
+        });
+    } else {
+        alert("Clipboard isn't available here. Please select and copy the text manually.");
+    }
+    closeShareModal();
 }
 
 function confirmOrder() {
