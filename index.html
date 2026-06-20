@@ -36,6 +36,10 @@
         .reset-button { background-color: #e2e8f0; color: #2d3748; margin-top: 10px; }
         .reset-button:hover { background-color: #cbd5e0; }
 
+        /* Share button styling */
+        .share-button { background-color: #25D366; margin-top: 10px; display: none; }
+        .share-button:hover { background-color: #1ebe57; }
+
         /* Confirm order button */
         .confirm-button { background-color: #38a169; margin-top: 12px; display: none; }
         .confirm-button:hover { background-color: #2f855a; }
@@ -67,7 +71,7 @@
         </div>
 
         <div class="form-group">
-            <label>What is the customer's workpiece material/job?</label>
+            <label>Workpiece Material / Application</label>
             <select id="workpieceMaterial" onchange="getRecommendation()">
                 <option value="">-- Tap to choose workpiece requirement --</option>
                 <option value="hardened_high">Hardened Steel / High-Temp Alloys (Up to 70 HRC)</option>
@@ -139,10 +143,16 @@
             <input type="number" id="length" inputmode="decimal" placeholder="e.g. 75" step="any" min="1">
         </div>
 
+        <div class="form-group">
+            <label>Transportation Charges</label>
+            <input type="number" id="transport" inputmode="decimal" placeholder="e.g. 100 (leave blank if none)" step="any" min="0">
+        </div>
+
         <div class="limit-warning" id="limitWarning"></div>
 
         <button onclick="calculateQuote()">Calculate Invoice Price</button>
         <button class="reset-button" onclick="resetForm()">↺ Reset / New Quote</button>
+        <button class="share-button" id="shareBtn" onclick="shareQuote()">📤 Share Quote with Customer</button>
 
         <div class="result-box" id="results">
             <div class="result-row muted-row" id="qtyRow"><span>Quantity:</span><span id="qtyDisplay">1</span></div>
@@ -151,6 +161,7 @@
             <div class="result-row" id="coatFinalRow"><span>Coating Fee (Total):</span><span id="coatFinal">₹0.00</span></div>
             <div class="result-row total-row"><span>Subtotal Amount:</span><span id="subtotal">₹0.00</span></div>
             <div class="result-row"><span>GST (18%):</span><span id="gst">₹0.00</span></div>
+            <div class="result-row muted-row"><span>Transportation (No GST):</span><span id="transportDisplay">₹0.00</span></div>
             <div class="result-row muted-row"><span>Round Off:</span><span id="roundOff">₹0.00</span></div>
             <div class="result-row total-row" style="font-size:20px; color:#1a202c;"><span>Total Grand Bill:</span><span id="grandTotal">₹0.00</span></div>
         </div>
@@ -314,6 +325,7 @@ function calculateQuote() {
     const limitWarning = document.getElementById("limitWarning");
     limitWarning.style.display = "none";
     document.getElementById("confirmBtn").style.display = "none";
+    document.getElementById("shareBtn").style.display = "none";
     document.getElementById("sheetStatus").style.display = "none";
     lastQuoteData = null;
 
@@ -371,10 +383,12 @@ function calculateQuote() {
 
     const totalResharpeningCost = resharpeningUnitCost * inputQty;
     const totalCoatingCost = modifiedCoatingUnitCost * inputQty;
+    const transportInput = parseFloat(document.getElementById("transport").value);
+    const transportCost = isNaN(transportInput) ? 0 : transportInput;
 
     const subtotal = totalResharpeningCost + totalCoatingCost;
     const gst = subtotal * 0.18;
-    const grandTotalRaw = subtotal + gst;
+    const grandTotalRaw = subtotal + gst + transportCost;
     const grandTotalRounded = Math.round(grandTotalRaw);
     const roundOff = grandTotalRounded - grandTotalRaw;
 
@@ -384,6 +398,7 @@ function calculateQuote() {
     document.getElementById("coatFinal").innerText = "₹" + totalCoatingCost.toFixed(2);
     document.getElementById("subtotal").innerText = "₹" + subtotal.toFixed(2);
     document.getElementById("gst").innerText = "₹" + gst.toFixed(2);
+    document.getElementById("transportDisplay").innerText = "₹" + transportCost.toFixed(2);
     document.getElementById("roundOff").innerText = (roundOff >= 0 ? "+₹" : "-₹") + Math.abs(roundOff).toFixed(2);
     document.getElementById("grandTotal").innerText = "₹" + grandTotalRounded.toFixed(2);
     document.getElementById("results").style.display = "block";
@@ -405,16 +420,97 @@ function calculateQuote() {
         flutes: flutes,
         material: materialSelect.options[materialSelect.selectedIndex].text,
         coating: coatingSelect.options[coatingSelect.selectedIndex].text,
+        coatingCode: coating,
         diameter: inputDia,
         quantity: inputQty,
         totalLength: coating !== "NONE" ? inputLen : "N/A",
         resharpeningTotal: totalResharpeningCost.toFixed(2),
         coatingTotal: totalCoatingCost.toFixed(2),
+        subtotal: subtotal.toFixed(2),
+        gst: gst.toFixed(2),
+        transportCost: transportCost.toFixed(2),
         grandTotal: grandTotalRounded.toFixed(2)
     };
 
     document.getElementById("confirmBtn").style.display = "block";
+    document.getElementById("shareBtn").style.display = "block";
     document.getElementById("sheetStatus").style.display = "none";
+}
+
+function buildQuoteText() {
+    const q = lastQuoteData;
+
+    // Customer-facing coating names — no internal pricing multipliers shown
+    const cleanCoatingNames = {
+        "NONE": "No Coating (Resharpening Only)",
+        "ALCRONA": "BALINIT ALCRONA PRO / EVO",
+        "HARD_CARBON": "BALINIT HARD CARBON / MAYURA",
+        "DURANA": "BALINIT DURANA / OPTURA",
+        "TISINOS": "BALIQ TISINOS PRO"
+    };
+    const displayCoating = cleanCoatingNames[q.coatingCode] || q.coating;
+
+    let lines = [];
+    lines.push("*K&S ENGINEERING WORKS*");
+    lines.push("Resharpening & Recoating Quotation");
+    lines.push("");
+    lines.push("Customer: " + q.customerName);
+    lines.push("Date: " + q.date + ", " + q.time);
+    lines.push("");
+    lines.push("Tool: " + q.toolCategory + " (" + q.flutes + " Flutes)");
+    lines.push("Material: " + q.material);
+    lines.push("Coating: " + displayCoating);
+    lines.push("Diameter: " + q.diameter + " mm");
+    lines.push("Quantity: " + q.quantity);
+    if (q.totalLength !== "N/A") {
+        lines.push("Tool Length: " + q.totalLength + " mm");
+    }
+    lines.push("");
+    lines.push("Resharpening: ₹" + q.resharpeningTotal);
+    if (parseFloat(q.coatingTotal) > 0) {
+        lines.push("Coating: ₹" + q.coatingTotal);
+    }
+    lines.push("Subtotal: ₹" + q.subtotal);
+    lines.push("GST (18%): ₹" + q.gst);
+    if (parseFloat(q.transportCost) > 0) {
+        lines.push("Transportation (No GST): ₹" + q.transportCost);
+    }
+    lines.push("-----------------------------");
+    lines.push("*Total Amount: ₹" + q.grandTotal + "*");
+    lines.push("");
+    lines.push("Thank you for choosing us!");
+    return lines.join("\n");
+}
+
+function shareQuote() {
+    if (!lastQuoteData) {
+        alert("Please calculate a quote first.");
+        return;
+    }
+
+    const quoteText = buildQuoteText();
+
+    if (navigator.share) {
+        navigator.share({
+            title: "Quotation for " + lastQuoteData.customerName,
+            text: quoteText
+        }).catch(() => {
+            // User cancelled the share sheet - no action needed
+        });
+    } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(quoteText).then(() => {
+            alert("Quote copied to clipboard! Paste it into WhatsApp or any chat app to send it.");
+        }).catch(() => {
+            openWhatsAppFallback(quoteText);
+        });
+    } else {
+        openWhatsAppFallback(quoteText);
+    }
+}
+
+function openWhatsAppFallback(quoteText) {
+    const url = "https://wa.me/?text=" + encodeURIComponent(quoteText);
+    window.open(url, "_blank");
 }
 
 function confirmOrder() {
@@ -472,6 +568,7 @@ function resetForm() {
 
     document.getElementById("diameter").value = "";
     document.getElementById("length").value = "";
+    document.getElementById("transport").value = "";
     document.getElementById("quantity").value = "1";
 
     document.getElementById("limitWarning").style.display = "none";
@@ -481,6 +578,7 @@ function resetForm() {
     confirmBtn.style.display = "none";
     confirmBtn.disabled = false;
     confirmBtn.innerText = "✅ Confirm Order";
+    document.getElementById("shareBtn").style.display = "none";
     document.getElementById("sheetStatus").style.display = "none";
     lastQuoteData = null;
 }
@@ -499,7 +597,7 @@ GOOGLE SHEET SETUP INSTRUCTIONS (one-time setup)
    In Row 1, add these column headers exactly in this order:
    Customer Name | Contact Number | Date | Time | Tool Category | Flutes |
    Material | Coating | Diameter (mm) | Quantity | Total Length (mm) |
-   Resharpening Total | Coating Total | Grand Bill
+   Resharpening Total | Coating Total | Transportation Charges | Grand Bill
 
 2. In that Sheet, go to Extensions > Apps Script.
    Delete any starter code and paste this:
@@ -521,6 +619,7 @@ GOOGLE SHEET SETUP INSTRUCTIONS (one-time setup)
        data.totalLength,
        data.resharpeningTotal,
        data.coatingTotal,
+       data.transportCost,
        data.grandTotal
      ]);
      return ContentService.createTextOutput(JSON.stringify({status: "success"}))
