@@ -14,77 +14,37 @@
         input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; font-size: 16px; background-color: #fff; }
         button { width: 100%; background-color: #3182ce; color: white; border: none; padding: 12px; font-size: 18px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 5px; }
         button:hover { background-color: #2b6cb0; }
-
-        /* Recommendation helper styles */
         .rec-box { background-color: #f0fff4; border-left: 4px solid #38a169; padding: 12px; border-radius: 6px; margin-top: 10px; font-size: 14px; display: none; }
         .rec-title { font-weight: bold; color: #276749; margin-bottom: 4px; font-size: 15px;}
-
-        /* Results output styles */
         .result-box { background-color: #ebf8ff; border-left: 4px solid #3182ce; padding: 15px; border-radius: 4px; margin-top: 20px; display: none; }
         .result-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 15px; }
         .total-row { font-weight: bold; font-size: 18px; border-top: 1px dashed #cbd5e0; padding-top: 8px; margin-top: 8px; color: #2c5282; }
         .muted-row { color: #718096; font-size: 13px; }
-
-        /* Limit warning */
         .limit-warning { background-color: #fff5f5; border-left: 4px solid #e53e3e; color: #9b2c2c; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 14px; display: none; }
-
-        /* Half-width row layout */
         .form-row { display: flex; gap: 10px; }
         .form-row .form-group { flex: 1; margin-bottom: 15px; }
-
-        /* Reset button styling */
         .reset-button { background-color: #e2e8f0; color: #2d3748; margin-top: 10px; }
         .reset-button:hover { background-color: #cbd5e0; }
-
-        /* Share button styling */
         .share-button { background-color: #25D366; margin-top: 10px; display: none; }
         .share-button:hover { background-color: #1ebe57; }
-
-        /* Confirm order button */
         .confirm-button { background-color: #38a169; margin-top: 12px; display: none; }
         .confirm-button:hover { background-color: #2f855a; }
         .confirm-button:disabled { background-color: #9ae6b4; cursor: not-allowed; }
-
-        /* Sheet sync status message */
         .sheet-status { margin-top: 10px; padding: 10px; border-radius: 6px; font-size: 14px; display: none; }
         .sheet-status.sending { background-color: #ebf8ff; color: #2c5282; border-left: 4px solid #3182ce; }
         .sheet-status.success { background-color: #f0fff4; color: #276749; border-left: 4px solid #38a169; }
         .sheet-status.error { background-color: #fff5f5; color: #9b2c2c; border-left: 4px solid #e53e3e; }
-
-        /* Share options modal (fallback for environments without native share sheet) */
-        .share-modal-backdrop {
-            display: none;
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: flex-end;
-            justify-content: center;
-        }
+        .share-modal-backdrop { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: flex-end; justify-content: center; }
         .share-modal-backdrop.visible { display: flex; }
-        .share-modal-box {
-            background: white;
-            width: 100%;
-            max-width: 500px;
-            border-radius: 16px 16px 0 0;
-            padding: 20px;
-            box-sizing: border-box;
-            animation: slideUp 0.2s ease-out;
-        }
+        .share-modal-box { background: white; width: 100%; max-width: 500px; border-radius: 16px 16px 0 0; padding: 20px; box-sizing: border-box; animation: slideUp 0.2s ease-out; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .share-modal-box h3 { margin: 0 0 15px 0; color: #1a365d; text-align: center; }
-        .share-option-btn {
-            width: 100%; text-align: left; padding: 14px 16px; margin-bottom: 8px;
-            border: 1px solid #e2e8f0; border-radius: 8px; background: #f7fafc;
-            color: #2d3748; font-size: 16px; font-weight: normal;
-        }
+        .share-option-btn { width: 100%; text-align: left; padding: 14px 16px; margin-bottom: 8px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f7fafc; color: #2d3748; font-size: 16px; font-weight: normal; }
         .share-option-btn:hover { background: #edf2f7; }
-
-        /* Live price sync status banner */
         .price-status { padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; }
         .price-status.loading { background-color: #ebf8ff; color: #2c5282; border-left: 4px solid #3182ce; }
         .price-status.success { background-color: #f0fff4; color: #276749; border-left: 4px solid #38a169; }
         .price-status.warning { background-color: #fffaf0; color: #9c4221; border-left: 4px solid #dd6b20; }
-
         .refresh-button { background-color: #edf2f7; color: #2d3748; font-size: 14px; padding: 8px; margin-top: 0; margin-bottom: 15px; }
         .refresh-button:hover { background-color: #e2e8f0; }
         .cancel-btn { background: #fff; color: #e53e3e; text-align: center; border: none; margin-top: 8px; }
@@ -93,21 +53,16 @@
 <body>
 
 <div class="container">
-
-    <!-- CARD 1: INTELLIGENT RECOMMENDATION HELPER -->
     <div class="card">
         <h2>🎯 Which Coating Do I Need?</h2>
-
         <div class="form-group">
             <label>Customer Name</label>
             <input type="text" id="customerName" placeholder="e.g. Patel Engineering">
         </div>
-
         <div class="form-group">
             <label>Contact Number</label>
             <input type="tel" id="customerContact" inputmode="tel" placeholder="e.g. 9876543210">
         </div>
-
         <div class="form-group">
             <label>Workpiece Material / Application</label>
             <select id="workpieceMaterial" onchange="getRecommendation()">
@@ -120,17 +75,14 @@
                 <option value="hardened_drills_reamers">Hardened Steel – Stick Blades / Drills / Reamers (45–72 HRC)</option>
             </select>
         </div>
-
         <div class="rec-box" id="recDisplay">
             <div class="rec-title" id="recTargetCoating">Recommended Choice: -</div>
             <div id="recDescription">-</div>
         </div>
     </div>
 
-    <!-- CARD 2: MAIN PRICING CALCULATOR -->
     <div class="card">
         <h2>📐 Quote & Dimension Settings</h2>
-
         <div class="price-status" id="priceStatus" style="display:none;"></div>
         <button class="refresh-button" onclick="loadPricesFromSheets()">🔄 Refresh Prices</button>
 
@@ -144,12 +96,10 @@
                 <option value="chamfer">Chamfering Knife</option>
             </select>
         </div>
-
         <div class="form-group">
             <label>Flutes</label>
             <select id="flutes"></select>
         </div>
-
         <div class="form-group">
             <label>Tool Substrate Material</label>
             <select id="material">
@@ -157,7 +107,6 @@
                 <option value="hss">HSS (20% Coating Discount applied)</option>
             </select>
         </div>
-
         <div class="form-group">
             <label>Coating Layer Selection</label>
             <select id="coatingType" onchange="toggleLengthInput()">
@@ -171,7 +120,6 @@
                 <option value="TISINOS_PRO">BALIQ TISINOS PRO (1.85x Rate)</option>
             </select>
         </div>
-
         <div class="form-row">
             <div class="form-group">
                 <label>Diameter (mm) — Max 20mm</label>
@@ -182,19 +130,16 @@
                 <input type="number" id="quantity" inputmode="numeric" placeholder="e.g. 1" step="1" min="1" value="1">
             </div>
         </div>
-
         <div class="form-group" id="lengthGroup" style="display: none;">
             <label>Total Length (mm)</label>
             <input type="number" id="length" inputmode="decimal" placeholder="e.g. 75" step="any" min="1">
         </div>
-
         <div class="form-group">
             <label>Transportation Charges</label>
-            <input type="number" id="transport" inputmode="decimal" placeholder="e.g. 100 (leave blank if none)" step="any" min="0">
+            <input type="number" id="transport" inputmode="decimal" placeholder="e.g. 100" step="any" min="0">
         </div>
 
         <div class="limit-warning" id="limitWarning"></div>
-
         <button onclick="calculateQuote()">Calculate Invoice Price</button>
         <button class="reset-button" onclick="resetForm()">↺ Reset / New Quote</button>
         <button class="share-button" id="shareBtn" onclick="shareQuote()">📤 Share Quote with Customer</button>
@@ -210,14 +155,11 @@
             <div class="result-row muted-row"><span>Round Off:</span><span id="roundOff">₹0.00</span></div>
             <div class="result-row total-row" style="font-size:20px; color:#1a202c;"><span>Total Grand Bill:</span><span id="grandTotal">₹0.00</span></div>
         </div>
-
         <button class="confirm-button" id="confirmBtn" onclick="confirmOrder()">✅ Confirm Order</button>
         <div class="sheet-status" id="sheetStatus"></div>
     </div>
-
 </div>
 
-<!-- SHARE OPTIONS MODAL (used when native share sheet isn't available, e.g. inside app-wrapper WebViews) -->
 <div class="share-modal-backdrop" id="shareModalBackdrop" onclick="closeShareModal(event)">
     <div class="share-modal-box" onclick="event.stopPropagation()">
         <h3>Share Quote Via</h3>
@@ -230,201 +172,19 @@
 </div>
 
 <script>
-// ===== GOOGLE SHEET INTEGRATION =====
-// Paste your deployed Google Apps Script Web App URL here (see setup notes at bottom of this file).
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxo7k0nB_IrqI1cjYY9fhoqlB6f2GIUnKCwZBZ8iQNLfBSbl6oi-Dhw_DM1ZJ6Xio_Avw/exec";
-
-// Holds the data for the most recently calculated quote, used by Confirm Order
-let lastQuoteData = null;
-
-// Holds the quote text currently queued for sharing via the fallback modal
-let pendingShareText = null;
-
-// Resharpening machine capacity limit
-const MAX_RESHARPEN_DIA = 20;
-
-// ===== LIVE PRICE SHEET INTEGRATION =====
-// Paste your published Google Sheet CSV links here (see setup notes at the bottom of this file).
-// Prices are loaded from prices.json which lives in the same GitHub Pages
-// repo as this file. Same domain = zero CORS issues, guaranteed.
-// To update prices: edit prices.json on GitHub, commit, done.
 const PRICES_JSON_URL = "./prices.json";
-
 const CACHE_KEY_RESHARPENING = "kands_resharpening_price_cache";
 const CACHE_KEY_COATING = "kands_coating_price_cache";
+const MAX_RESHARPEN_DIA = 20;
 
-// ---- Built-in fallback prices (used only if the sheets can't be reached AND no cache exists yet) ----
-const DEFAULT_COATING_DIAMETERS = [3, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 26, 30, 32, 35, 40, 50];
-const DEFAULT_COATING_LENGTHS = [50, 75, 100, 150, 200, 300, 400, 500];
-const DEFAULT_COATING_BASE_PRICES = {
-    3:  [81.65,  82.80,  125.35, 166.75, 409.40, 738.30, 863.65,  923.45],
-    4:  [81.65,  82.80,  125.35, 166.75, 409.40, 738.30, 923.45,  1038.45],
-    6:  [95.45,  98.90,  148.35, 197.80, 409.40, 738.30, 923.45,  1360.45],
-    8:  [118.45, 127.65, 182.85, 243.80, 409.40, 738.30, 923.45,  1534.10],
-    10: [154.10, 158.70, 236.90, 316.25, 409.40, 738.30, 923.45,  1677.85],
-    12: [185.15, 189.75, 285.20, 379.50, 409.40, 738.30, 923.45,  1791.70],
-    14: [231.15, 236.90, 355.35, 474.95, 512.90, 923.45, 1154.60, 1948.10],
-    16: [231.15, 236.90, 355.35, 474.95, 512.90, 923.45, 1154.60, 2179.25],
-    18: [308.20, 316.25, 474.95, 632.50, 821.10, 1476.60,1845.75, 2381.65],
-    20: [308.20, 316.25, 474.95, 632.50, 821.10, 1476.60,1845.75, 2705.95],
-    22: [385.25, 395.60, 593.40, 791.20, 1024.65,1845.75,2306.90, 3073.95],
-    26: [512.90, 526.70, 791.20, 1024.65,1054.55,1845.75,2306.90, 3540.85],
-    30: [512.90, 791.20, 1185.65,1581.25,2032.05,3008.40,4395.30, 5537.25],
-    32: [512.90, 791.20, 1185.65,1581.25,2051.60,3215.40,4614.95, 5810.95],
-    35: [593.40, 826.85, 1627.25,1670.95,2051.60,3423.55,4910.50, 7226.60],
-    40: [641.70, 1200.60,1787.10,2121.75,2404.65,3691.50,5169.25, 9022.90],
-    50: [691.15, 1760.65,1902.10,3516.70,3691.50,4279.15,5557.95, 15403.10]
-};
+let lastQuoteData = null;
+let pendingShareText = null;
+let coatingDiameters = [];
+let coatingLengths = [];
+let coatingBasePrices = {};
+let RESHARPENING_TABLE = {};
 
-// Resharpening default table: exact per-diameter lookup built from your Excel grid.
-// Structure: { category: { fluteCount: { diameter: price } } }
-const DEFAULT_RESHARPENING_TABLE = {
-    flatendmill: {
-        2: {3:50,4:50,5:50,6:50,7:70,8:70,9:70,10:70,11:70,12:70,13:100,14:100,15:100,16:100,17:160,18:160,19:160,20:160},
-        3: {3:50,4:50,5:50,6:50,7:70,8:70,9:70,10:70,11:70,12:70,13:100,14:100,15:100,16:100,17:160,18:160,19:160,20:160},
-        4: {3:55,4:55,5:55,6:55,7:75,8:75,9:75,10:75,11:75,12:75,13:110,14:110,15:110,16:110,17:170,18:170,19:170,20:170},
-        5: {3:55,4:55,5:55,6:55,7:75,8:75,9:75,10:75,11:75,12:75,13:110,14:110,15:110,16:110,17:170,18:170,19:170,20:170},
-        6: {3:55,4:55,5:55,6:55,7:75,8:75,9:75,10:75,11:75,12:75,13:110,14:110,15:110,16:110,17:170,18:170,19:170,20:170}
-    },
-    radiusendmill: {
-        2: {3:50,4:50,5:50,6:50,7:70,8:70,9:70,10:70,11:70,12:70,13:100,14:100,15:100,16:100,17:160,18:160,19:160,20:160},
-        3: {3:50,4:50,5:50,6:50,7:70,8:70,9:70,10:70,11:70,12:70,13:100,14:100,15:100,16:100,17:160,18:160,19:160,20:160},
-        4: {3:55,4:55,5:55,6:55,7:75,8:75,9:75,10:75,11:75,12:75,13:110,14:110,15:110,16:110,17:170,18:170,19:170,20:170},
-        5: {3:55,4:55,5:55,6:55,7:75,8:75,9:75,10:75,11:75,12:75,13:110,14:110,15:110,16:110,17:170,18:170,19:170,20:170},
-        6: {3:55,4:55,5:55,6:55,7:75,8:75,9:75,10:75,11:75,12:75,13:110,14:110,15:110,16:110,17:170,18:170,19:170,20:170}
-    },
-    ballnose: {
-        2: {3:60,4:60,5:60,6:60,7:80,8:80,9:80,10:80,11:80,12:80,13:110,14:110,15:110,16:110,17:170,18:170,19:170,20:170},
-        4: {3:60,4:60,5:60,6:60,7:80,8:80,9:80,10:80,11:80,12:80,13:110,14:110,15:110,16:110,17:170,18:170,19:170,20:170}
-    },
-    drill: {
-        2: {3:20,4:20,5:30,6:30,7:30,8:30,9:40,10:40,11:40,12:40,13:40,14:40,15:50,16:50,17:50,18:50,19:50,20:50}
-    },
-    chamfer: {
-        2: {3:30,4:30,5:30,6:30,7:30,8:30,9:30,10:30,11:40,12:40,13:40,14:40,15:40,16:40,17:40,18:40,19:40,20:40},
-        3: {3:40,4:40,5:40,6:40,7:40,8:40,9:40,10:40,11:50,12:50,13:50,14:50,15:50,16:50,17:50,18:50,19:50,20:50}
-    }
-};
-
-// ---- Live (mutable) price data - starts as defaults, gets overwritten by sheet/cache on load ----
-let coatingDiameters = DEFAULT_COATING_DIAMETERS.slice();
-let coatingLengths = DEFAULT_COATING_LENGTHS.slice();
-let coatingBasePrices = JSON.parse(JSON.stringify(DEFAULT_COATING_BASE_PRICES));
-let RESHARPENING_TABLE = JSON.parse(JSON.stringify(DEFAULT_RESHARPENING_TABLE));
-
-// ---- CSV fetch + parse helpers ----
-function parseCSV(text) {
-    return text.trim().split(/\r?\n/).map(line => {
-        const result = [];
-        let cur = "";
-        let inQuotes = false;
-        for (let i = 0; i < line.length; i++) {
-            const ch = line[i];
-            if (ch === '"') { inQuotes = !inQuotes; }
-            else if (ch === ',' && !inQuotes) { result.push(cur); cur = ""; }
-            else { cur += ch; }
-        }
-        result.push(cur);
-        return result.map(s => s.trim());
-    });
-}
-
-async function fetchCSV(url) {
-    // Apps Script web apps redirect before serving content.
-    // redirect: "follow" + credentials: "omit" ensures the redirect
-    // completes cleanly without CORS issues.
-    const bustUrl = url + (url.includes("?") ? "&" : "?") + "cachebust=" + Date.now();
-    const res = await fetch(bustUrl, {
-        method: "GET",
-        redirect: "follow",
-        credentials: "omit"
-    });
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const text = await res.text();
-    if (!text || text.trim().length === 0) throw new Error("Empty response");
-    return parseCSV(text);
-}
-
-// Maps your Excel section headers exactly to the internal category names
-const SECTION_NAMES = {
-    "FLAT MILLING CUTTER": "flatendmill",
-    "RADIUS MILLING CUTTER": "radiusendmill",
-    "BALL NOSE CUTTER": "ballnose",
-    "DRILL BIT": "drill",
-    "CHAMFERING KNIFE": "chamfer"
-};
-
-function parseResharpeningTable(rows) {
-    const table = {};
-    let currentCategory = null;
-    let currentDiameters = [];
-
-    for (const row of rows) {
-        const first = (row[0] || "").trim();
-
-        // Section header row e.g. "FLAT MILLING CUTTER"
-        if (SECTION_NAMES[first]) {
-            currentCategory = SECTION_NAMES[first];
-            table[currentCategory] = {};
-            currentDiameters = [];
-            continue;
-        }
-
-        // FLUTES header row — extract diameter numbers from " ⌀ 3", " ⌀ 4" etc.
-        if (first === "FLUTES") {
-            currentDiameters = row.slice(1)
-                .map(h => parseFloat((h || "").replace(/[^0-9.]/g, "")))
-                .filter(n => !isNaN(n) && n > 0);
-            continue;
-        }
-
-        // Data row — first cell is a flute count number
-        const fluteCount = parseInt(first);
-        if (!isNaN(fluteCount) && currentCategory && currentDiameters.length > 0) {
-            table[currentCategory][fluteCount] = {};
-            for (let i = 0; i < currentDiameters.length; i++) {
-                const price = parseFloat(row[i + 1]);
-                if (!isNaN(price)) {
-                    table[currentCategory][fluteCount][currentDiameters[i]] = price;
-                }
-            }
-        }
-    }
-
-    if (Object.keys(table).length === 0) throw new Error("Resharpening sheet returned no usable data");
-    return table;
-}
-
-function parseCoatingGrid(rows) {
-    // Find the length-header row: first cell is blank, second cell is a number (e.g. 50).
-    // This skips the title/description rows at the top of your Excel format.
-    let headerRowIndex = -1;
-    for (let i = 0; i < rows.length; i++) {
-        const first = (rows[i][0] || "").trim();
-        const second = parseFloat((rows[i][1] || "").trim());
-        if (first === "" && !isNaN(second) && second > 0) {
-            headerRowIndex = i;
-            break;
-        }
-    }
-    if (headerRowIndex === -1) throw new Error("Could not find length header row in coating sheet");
-
-    const lengths = rows[headerRowIndex].slice(1).map(Number).filter(n => !isNaN(n) && n > 0);
-    const diameters = [];
-    const prices = {};
-
-    for (let i = headerRowIndex + 1; i < rows.length; i++) {
-        const dia = parseFloat((rows[i][0] || "").trim());
-        if (isNaN(dia) || dia <= 0) continue; // skip footer/text rows
-        diameters.push(dia);
-        prices[dia] = rows[i].slice(1, lengths.length + 1).map(Number);
-    }
-
-    if (diameters.length === 0) throw new Error("Coating sheet returned no price rows");
-    return { diameters, lengths, prices };
-}
-
-// ---- Main price loader, called on page load and via the Refresh Prices button ----
 async function loadPricesFromSheets() {
     const statusEl = document.getElementById("priceStatus");
     statusEl.className = "price-status loading";
@@ -432,69 +192,46 @@ async function loadPricesFromSheets() {
     statusEl.style.display = "block";
 
     try {
-        const bustUrl = PRICES_JSON_URL + "?v=" + Date.now();
-        const res = await fetch(bustUrl);
+        const res = await fetch(PRICES_JSON_URL + "?v=" + Date.now());
         if (!res.ok) throw new Error("HTTP " + res.status);
         const data = await res.json();
 
-        // Load resharpening table
         if (data.resharpening) {
             RESHARPENING_TABLE = data.resharpening;
             localStorage.setItem(CACHE_KEY_RESHARPENING, JSON.stringify({ table: RESHARPENING_TABLE, savedAt: Date.now() }));
         }
-
-        // Load coating prices
         if (data.coating) {
-            coatingLengths    = data.coating.lengths;
+            coatingLengths = data.coating.lengths;
             coatingBasePrices = data.coating.prices;
-            coatingDiameters  = Object.keys(data.coating.prices).map(Number).sort((a, b) => a - b);
+            coatingDiameters = Object.keys(data.coating.prices).map(Number).sort((a, b) => a - b);
             localStorage.setItem(CACHE_KEY_COATING, JSON.stringify({ diameters: coatingDiameters, lengths: coatingLengths, prices: coatingBasePrices, savedAt: Date.now() }));
         }
-
-        const updated = data.lastUpdated || "unknown date";
         statusEl.className = "price-status success";
-        statusEl.innerText = "✅ Prices loaded (last updated: " + updated + ")";
+        statusEl.innerText = "✅ Prices loaded (last updated: " + (data.lastUpdated || "recently") + ")";
         return;
-
     } catch (err) {
         console.warn("prices.json fetch failed:", err.message);
     }
 
-    // Fetch failed — try device cache, then fall back to built-in defaults
     let cacheDate = null;
     const cachedResh = localStorage.getItem(CACHE_KEY_RESHARPENING);
     const cachedCoat = localStorage.getItem(CACHE_KEY_COATING);
 
-    if (cachedResh) {
-        const p = JSON.parse(cachedResh);
-        RESHARPENING_TABLE = p.table;
-        cacheDate = new Date(p.savedAt);
-    } else {
-        RESHARPENING_TABLE = JSON.parse(JSON.stringify(DEFAULT_RESHARPENING_TABLE));
-    }
-
-    if (cachedCoat) {
+    if (cachedResh && cachedCoat) {
+        RESHARPENING_TABLE = JSON.parse(cachedResh).table;
         const p = JSON.parse(cachedCoat);
-        coatingDiameters  = p.diameters;
-        coatingLengths    = p.lengths;
+        coatingDiameters = p.diameters;
+        coatingLengths = p.lengths;
         coatingBasePrices = p.prices;
         cacheDate = new Date(p.savedAt);
-    } else {
-        coatingDiameters  = DEFAULT_COATING_DIAMETERS.slice();
-        coatingLengths    = DEFAULT_COATING_LENGTHS.slice();
-        coatingBasePrices = JSON.parse(JSON.stringify(DEFAULT_COATING_BASE_PRICES));
-    }
-
-    if (cacheDate) {
         statusEl.className = "price-status warning";
-        statusEl.innerText = "⚠ Couldn't reach prices.json. Using last saved prices from " + cacheDate.toLocaleString("en-IN") + ".";
+        statusEl.innerText = "⚠ Using last saved offline prices (" + cacheDate.toLocaleString("en-IN") + ").";
     } else {
-        statusEl.className = "price-status warning";
-        statusEl.innerText = "⚠ Couldn't reach the price sheet and no saved prices found. Using built-in default prices.";
+        statusEl.className = "price-status error";
+        statusEl.innerText = "❌ Connection failed. Please check internet connection to load initial configuration prices.";
     }
 }
 
-// Fixed Application Assistant Logic
 function getRecommendation() {
     const material = document.getElementById("workpieceMaterial").value;
     const recDisplay = document.getElementById("recDisplay");
@@ -502,57 +239,48 @@ function getRecommendation() {
     const description = document.getElementById("recDescription");
     const mainCoatingSelector = document.getElementById("coatingType");
 
-    if (!material) {
-        recDisplay.style.display = "none";
-        return;
-    }
-
+    if (!material) { recDisplay.style.display = "none"; return; }
     recDisplay.style.display = "block";
 
     switch(material) {
         case "hardened_high":
             targetCoating.innerText = "⭐ BALIQ TISINOS PRO";
-            description.innerText = "Best choice for high-precision hard machining up to 70 HRC, hardened steel, and high-temp alloys. Built to handle heavy thermal load stress.";
+            description.innerText = "Best choice for high-precision hard machining up to 70 HRC. Handles heavy thermal load stress.";
             mainCoatingSelector.value = "TISINOS_PRO";
             break;
         case "stainless":
-            targetCoating.innerText = "⭐ BALIQ TISINOS PRO (or BALINIT ALCRONA EVO)";
-            description.innerText = "TISINOS PRO is ideal for high-reliability stainless steel cutting (drills, reamers, end mills). For general stainless milling/turning, ALCRONA EVO is the solid second option — selectable manually below if preferred.";
+            targetCoating.innerText = "⭐ BALIQ TISINOS PRO";
+            description.innerText = "Ideal for high-reliability stainless cutting. For general milling, ALCRONA EVO can be used.";
             mainCoatingSelector.value = "TISINOS_PRO";
             break;
         case "aluminium":
             targetCoating.innerText = "⭐ BALINIT MAYURA (ta-C)";
-            description.innerText = "Premium choice for Aluminium alloys (< 12% Silicon), Copper, Brass, and Polymers. Extremely smooth carbon surface prevents material adhesion and chip welding.";
+            description.innerText = "Premium smooth carbon coating prevents material adhesion and chip welding on Alu/Copper/Brass.";
             mainCoatingSelector.value = "MAYURA";
             break;
         case "drilling_steel":
             targetCoating.innerText = "⭐ BALINIT OPTURA";
-            description.innerText = "Engineered specifically for steel and cast iron drilling, deep-hole drilling, and reaming. Multilayer architecture optimizes wear resistance and borehole finish.";
+            description.innerText = "Engineered specifically for steel/cast iron drilling. Optimizes wear resistance.";
             mainCoatingSelector.value = "OPTURA";
             break;
         case "universal":
-            targetCoating.innerText = "⭐ BALINIT ALCRONA EVO (or BALINIT ALCRONA PRO)";
-            description.innerText = "ALCRONA EVO is the current 3rd-generation allrounder with >30% better wear resistance than PRO, so it's selected by default. ALCRONA PRO remains available manually below if that's specifically what the customer wants.";
+            targetCoating.innerText = "⭐ BALINIT ALCRONA EVO";
+            description.innerText = "3rd-generation general purpose allrounder with excellent versatility.";
             mainCoatingSelector.value = "ALCRONA_EVO";
             break;
         case "hardened_drills_reamers":
             targetCoating.innerText = "⭐ BALINIT DURANA";
-            description.innerText = "Suited for stick blades, drills, and reamers in hardened steel (45–72 HRC). Not for abrasive non-metals like graphite/composites/ceramics.";
+            description.innerText = "Suited for stick blades, drills, and reamers in hardened steel (45–72 HRC).";
             mainCoatingSelector.value = "DURANA";
             break;
     }
-
     toggleLengthInput();
 }
 
-// Resharpening Base Price Determination (direct per-diameter lookup from RESHARPENING_TABLE)
 function getResharpeningPrice(category, flutes, dia) {
     const d = Math.ceil(dia);
-    const catData = RESHARPENING_TABLE[category];
-    if (!catData) return 0;
-    const flutesData = catData[flutes];
-    if (!flutesData) return 0;
-    // Find the exact diameter or the next higher one in the table
+    if (!RESHARPENING_TABLE[category] || !RESHARPENING_TABLE[category][flutes]) return 0;
+    const flutesData = RESHARPENING_TABLE[category][flutes];
     const diameters = Object.keys(flutesData).map(Number).sort((a, b) => a - b);
     const matchDia = diameters.find(d2 => d2 >= d);
     return matchDia !== undefined ? flutesData[matchDia] : flutesData[diameters[diameters.length - 1]];
@@ -561,13 +289,11 @@ function getResharpeningPrice(category, flutes, dia) {
 function updateFluteOptions() {
     const cat = document.getElementById("toolCategory").value;
     const flutesSelect = document.getElementById("flutes");
-
     const currentSelectedValue = flutesSelect.value;
     flutesSelect.innerHTML = "";
 
-    let options = [];
-    if (cat === 'flatendmill' || cat === 'radiusendmill') options = [2, 3, 4, 5, 6];
-    else if (cat === 'ballnose') options = [2, 4];
+    let options = [2, 3, 4, 5, 6];
+    if (cat === 'ballnose') options = [2, 4];
     else if (cat === 'drill') options = [2];
     else if (cat === 'chamfer') options = [2, 3];
 
@@ -576,20 +302,11 @@ function updateFluteOptions() {
         opt.value = f; opt.innerText = f + " Flutes";
         flutesSelect.appendChild(opt);
     });
-
-    if (options.includes(parseInt(currentSelectedValue))) {
-        flutesSelect.value = currentSelectedValue;
-    }
+    if (options.includes(parseInt(currentSelectedValue))) flutesSelect.value = currentSelectedValue;
 }
 
 function toggleLengthInput() {
-    const coating = document.getElementById("coatingType").value;
-    const lengthGroup = document.getElementById("lengthGroup");
-    if (coating === "NONE") {
-        lengthGroup.style.display = "none";
-    } else {
-        lengthGroup.style.display = "block";
-    }
+    document.getElementById("lengthGroup").style.display = document.getElementById("coatingType").value === "NONE" ? "none" : "block";
 }
 
 function calculateQuote() {
@@ -601,57 +318,37 @@ function calculateQuote() {
     const inputLen = parseFloat(document.getElementById("length").value);
     const inputQty = parseInt(document.getElementById("quantity").value);
     const limitWarning = document.getElementById("limitWarning");
+    
     limitWarning.style.display = "none";
     document.getElementById("confirmBtn").style.display = "none";
     document.getElementById("shareBtn").style.display = "none";
     document.getElementById("sheetStatus").style.display = "none";
-    lastQuoteData = null;
 
-    if (isNaN(inputDia)) {
-        alert("Please enter a valid diameter parameter.");
+    if (isNaN(inputDia) || (coating !== "NONE" && isNaN(inputLen)) || isNaN(inputQty) || inputQty < 1) {
+        alert("Please parse missing dimension bounds parameters accurately.");
         return;
     }
-    if (coating !== "NONE" && isNaN(inputLen)) {
-        alert("Please enter a valid tool length parameter for coating estimation.");
-        return;
-    }
-    if (isNaN(inputQty) || inputQty < 1) {
-        alert("Please enter a valid quantity (minimum 1).");
-        return;
-    }
-
-    // Machine capacity cap - resharpening machine cannot handle above 20mm
     if (inputDia > MAX_RESHARPEN_DIA) {
-        limitWarning.innerText = "⚠ Diameter exceeds your machine's resharpening capacity (max " + MAX_RESHARPEN_DIA + "mm). This tool cannot be quoted on this calculator.";
+        limitWarning.innerText = "⚠ Diameter exceeds machine limits (max " + MAX_RESHARPEN_DIA + "mm).";
         limitWarning.style.display = "block";
         document.getElementById("results").style.display = "none";
         return;
     }
 
     const resharpeningUnitCost = getResharpeningPrice(cat, flutes, inputDia);
-    let baseCoatingCost = 0;
-    let modifiedCoatingUnitCost = 0;
+    let baseCoatingCost = 0, modifiedCoatingUnitCost = 0;
 
-    if (coating !== "NONE") {
-        let finalDiaSlab = coatingDiameters.find(d => d >= inputDia);
-        let finalLenSlab = coatingLengths.find(l => l >= inputLen);
-
-        if (!finalDiaSlab) finalDiaSlab = 50;
-        if (!finalLenSlab) finalLenSlab = 500;
-
+    if (coating !== "NONE" && coatingDiameters.length > 0) {
+        let finalDiaSlab = coatingDiameters.find(d => d >= inputDia) || 50;
+        let finalLenSlab = coatingLengths.find(l => l >= inputLen) || 500;
         const lenIndex = coatingLengths.indexOf(finalLenSlab);
-        baseCoatingCost = coatingBasePrices[finalDiaSlab][lenIndex];
+        baseCoatingCost = coatingBasePrices[finalDiaSlab] ? coatingBasePrices[finalDiaSlab][lenIndex] : 0;
 
-        let coatingMultiplier = 1.0; // ALCRONA_PRO, ALCRONA_EVO
-        if (coating === "HARD_CARBON" || coating === "MAYURA" || coating === "DURANA" || coating === "OPTURA") coatingMultiplier = 1.30;
-        else if (coating === "TISINOS_PRO") coatingMultiplier = 1.85;
+        let multiplier = 1.0;
+        if (["HARD_CARBON", "MAYURA", "DURANA", "OPTURA"].includes(coating)) multiplier = 1.30;
+        else if (coating === "TISINOS_PRO") multiplier = 1.85;
 
-        modifiedCoatingUnitCost = baseCoatingCost * coatingMultiplier;
-
-        if (material === "hss") {
-            modifiedCoatingUnitCost *= 0.80;
-        }
-
+        modifiedCoatingUnitCost = baseCoatingCost * multiplier * (material === "hss" ? 0.80 : 1.0);
         document.getElementById("coatBaseRow").style.display = "flex";
         document.getElementById("coatFinalRow").style.display = "flex";
     } else {
@@ -661,8 +358,7 @@ function calculateQuote() {
 
     const totalResharpeningCost = resharpeningUnitCost * inputQty;
     const totalCoatingCost = modifiedCoatingUnitCost * inputQty;
-    const transportInput = parseFloat(document.getElementById("transport").value);
-    const transportCost = isNaN(transportInput) ? 0 : transportInput;
+    const transportCost = parseFloat(document.getElementById("transport").value) || 0;
 
     const subtotal = totalResharpeningCost + totalCoatingCost;
     const gst = subtotal * 0.18;
@@ -681,366 +377,70 @@ function calculateQuote() {
     document.getElementById("grandTotal").innerText = "₹" + grandTotalRounded.toFixed(2);
     document.getElementById("results").style.display = "block";
 
-    // Capture everything needed for the Confirm Order -> Google Sheet sync
     const now = new Date();
-    const toolCategorySelect = document.getElementById("toolCategory");
-    const materialSelect = document.getElementById("material");
-    const coatingSelect = document.getElementById("coatingType");
-    const customerName = document.getElementById("customerName").value.trim();
-    const customerContact = document.getElementById("customerContact").value.trim();
-
     lastQuoteData = {
-        customerName: customerName || "(No name entered)",
-        customerContact: customerContact || "(No contact entered)",
-        date: now.toLocaleDateString("en-IN"),
-        time: now.toLocaleTimeString("en-IN"),
-        toolCategory: toolCategorySelect.options[toolCategorySelect.selectedIndex].text,
-        flutes: flutes,
-        material: materialSelect.options[materialSelect.selectedIndex].text,
-        coating: coatingSelect.options[coatingSelect.selectedIndex].text,
-        coatingCode: coating,
-        diameter: inputDia,
-        quantity: inputQty,
-        totalLength: coating !== "NONE" ? inputLen : "N/A",
-        resharpeningTotal: totalResharpeningCost.toFixed(2),
-        coatingTotal: totalCoatingCost.toFixed(2),
-        subtotal: subtotal.toFixed(2),
-        gst: gst.toFixed(2),
-        transportCost: transportCost.toFixed(2),
-        grandTotal: grandTotalRounded.toFixed(2)
+        customerName: document.getElementById("customerName").value.trim() || "(No name)",
+        customerContact: document.getElementById("customerContact").value.trim() || "(No contact)",
+        date: now.toLocaleDateString("en-IN"), time: now.toLocaleTimeString("en-IN"),
+        toolCategory: document.getElementById("toolCategory").options[document.getElementById("toolCategory").selectedIndex].text,
+        flutes: flutes, material: document.getElementById("material").options[document.getElementById("material").selectedIndex].text,
+        coating: document.getElementById("coatingType").options[document.getElementById("coatingType").selectedIndex].text,
+        coatingCode: coating, diameter: inputDia, quantity: inputQty, totalLength: coating !== "NONE" ? inputLen : "N/A",
+        resharpeningTotal: totalResharpeningCost.toFixed(2), coatingTotal: totalCoatingCost.toFixed(2),
+        subtotal: subtotal.toFixed(2), gst: gst.toFixed(2), transportCost: transportCost.toFixed(2), grandTotal: grandTotalRounded.toFixed(2)
     };
 
     document.getElementById("confirmBtn").style.display = "block";
     document.getElementById("shareBtn").style.display = "block";
-    document.getElementById("sheetStatus").style.display = "none";
 }
 
 function buildQuoteText() {
     const q = lastQuoteData;
-
-    // Customer-facing coating names — no internal pricing multipliers shown
-    const cleanCoatingNames = {
-        "NONE": "No Coating (Resharpening Only)",
-        "ALCRONA_PRO": "BALINIT ALCRONA PRO",
-        "ALCRONA_EVO": "BALINIT ALCRONA EVO",
-        "HARD_CARBON": "BALINIT HARD CARBON",
-        "MAYURA": "BALINIT MAYURA",
-        "DURANA": "BALINIT DURANA",
-        "OPTURA": "BALINIT OPTURA",
-        "TISINOS_PRO": "BALIQ TISINOS PRO"
-    };
-    const displayCoating = cleanCoatingNames[q.coatingCode] || q.coating;
-
-    let lines = [];
-    lines.push("*K&S ENGINEERING WORKS*");
-    lines.push("Resharpening & Recoating Quotation");
-    lines.push("");
-    lines.push("Customer: " + q.customerName);
-    lines.push("Date: " + q.date + ", " + q.time);
-    lines.push("");
-    lines.push("Tool: " + q.toolCategory + " (" + q.flutes + " Flutes)");
-    lines.push("Material: " + q.material);
-    lines.push("Coating: " + displayCoating);
-    lines.push("Diameter: " + q.diameter + " mm");
-    lines.push("Quantity: " + q.quantity);
-    if (q.totalLength !== "N/A") {
-        lines.push("Tool Length: " + q.totalLength + " mm");
-    }
-    lines.push("");
-    lines.push("Resharpening: ₹" + q.resharpeningTotal);
-    if (parseFloat(q.coatingTotal) > 0) {
-        lines.push("Coating: ₹" + q.coatingTotal);
-    }
-    lines.push("Subtotal: ₹" + q.subtotal);
-    lines.push("GST (18%): ₹" + q.gst);
-    if (parseFloat(q.transportCost) > 0) {
-        lines.push("Transportation (No GST): ₹" + q.transportCost);
-    }
-    lines.push("-----------------------------");
-    lines.push("*Total Amount: ₹" + q.grandTotal + "*");
-    lines.push("");
-    lines.push("Thank you for choosing us!");
+    let lines = ["*K&S ENGINEERING WORKS*", "Resharpening & Recoating Quotation", "", "Customer: " + q.customerName, "Date: " + q.date, "", "Tool: " + q.toolCategory + " (" + q.flutes + " Flutes)", "Diameter: " + q.diameter + " mm", "Quantity: " + q.quantity];
+    if (q.totalLength !== "N/A") lines.push("Tool Length: " + q.totalLength + " mm");
+    lines.push("", "Resharpening: ₹" + q.resharpeningTotal);
+    if (parseFloat(q.coatingTotal) > 0) lines.push("Coating: ₹" + q.coatingTotal);
+    lines.push("Subtotal: ₹" + q.subtotal, "GST (18%): ₹" + q.gst);
+    if (parseFloat(q.transportCost) > 0) lines.push("Transportation: ₹" + q.transportCost);
+    lines.push("-----------------------------", "*Total Amount: ₹" + q.grandTotal + "*", "", "Thank you for choosing us!");
     return lines.join("\n");
 }
 
 function shareQuote() {
-    if (!lastQuoteData) {
-        alert("Please calculate a quote first.");
-        return;
-    }
-
-    const quoteText = buildQuoteText();
-
-    if (navigator.share) {
-        navigator.share({
-            title: "Quotation for " + lastQuoteData.customerName,
-            text: quoteText
-        }).catch(() => {
-            // User cancelled the native share sheet - no action needed
-        });
-    } else {
-        // Native share sheet isn't available here (common inside app-wrapper
-        // WebViews like Alpha). Show our own menu with direct app buttons instead.
-        openShareModal(quoteText);
-    }
+    if (!lastQuoteData) return;
+    const text = buildQuoteText();
+    if (navigator.share) { navigator.share({ title: "Quote", text: text }).catch(() => {}); } 
+    else { openShareModal(text); }
 }
 
-function openShareModal(quoteText) {
-    pendingShareText = quoteText;
-    document.getElementById("shareModalBackdrop").classList.add("visible");
-}
-
-function closeShareModal(event) {
-    if (event && event.target !== document.getElementById("shareModalBackdrop")) return;
-    document.getElementById("shareModalBackdrop").classList.remove("visible");
-}
-
-function shareViaWhatsApp() {
-    const contact = (lastQuoteData.customerContact || "").replace(/[^0-9]/g, "");
-    const fullNumber = contact.length === 10 ? "91" + contact : "";
-
-    // Custom app scheme - more likely to trigger a native app intent
-    // than https://wa.me inside a restrictive WebView wrapper.
-    const schemeUrl = "whatsapp://send?" + (fullNumber ? "phone=" + fullNumber + "&" : "") + "text=" + encodeURIComponent(pendingShareText);
-
-    const start = Date.now();
-    window.location.href = schemeUrl;
-
-    // Safety net: if we're still here (WhatsApp app didn't open) after 1.5s,
-    // assume the WebView blocked the handoff and fall back to clipboard copy.
-    setTimeout(() => {
-        if (document.hasFocus() && Date.now() - start < 4000) {
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(pendingShareText).then(() => {
-                    alert("Couldn't open WhatsApp directly from here. The quote has been copied — please open WhatsApp yourself and paste it into the chat.");
-                });
-            } else {
-                alert("Couldn't open WhatsApp directly from here. Please use 'Copy Text' instead, then paste it into WhatsApp manually.");
-            }
-        }
-    }, 1500);
-
-    closeShareModal();
-}
-
-function shareViaSMS() {
-    const contact = (lastQuoteData.customerContact || "").replace(/[^0-9]/g, "");
-    // iOS uses "&body=", Android uses "?body=" - this format works on most Android devices.
-    const url = "sms:" + (contact.length === 10 ? contact : "") + "?body=" + encodeURIComponent(pendingShareText);
-    window.location.href = url;
-    closeShareModal();
-}
-
-function shareViaEmail() {
-    const subject = "Quotation - " + lastQuoteData.customerName;
-    const url = "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(pendingShareText);
-    window.location.href = url;
-    closeShareModal();
-}
-
-function shareViaCopy() {
-    if (navigator.clipboard) {
-        navigator.clipboard.writeText(pendingShareText).then(() => {
-            alert("Quote copied to clipboard! Paste it wherever you'd like to send it.");
-        }).catch(() => {
-            alert("Could not copy automatically. Please select and copy the text manually.");
-        });
-    } else {
-        alert("Clipboard isn't available here. Please select and copy the text manually.");
-    }
-    closeShareModal();
-}
+function openShareModal(text) { pendingShareText = text; document.getElementById("shareModalBackdrop").classList.add("visible"); }
+function closeShareModal() { document.getElementById("shareModalBackdrop").classList.remove("visible"); }
+function shareViaWhatsApp() { window.location.href = "whatsapp://send?text=" + encodeURIComponent(pendingShareText); closeShareModal(); }
+function shareViaSMS() { window.location.href = "sms:?body=" + encodeURIComponent(pendingShareText); closeShareModal(); }
+function shareViaEmail() { window.location.href = "mailto:?subject=Quote&body=" + encodeURIComponent(pendingShareText); closeShareModal(); }
+function shareViaCopy() { navigator.clipboard.writeText(pendingShareText).then(() => alert("Copied!")); closeShareModal(); }
 
 function confirmOrder() {
-    if (!lastQuoteData) {
-        alert("Please calculate a quote first.");
-        return;
-    }
-    if (GOOGLE_SCRIPT_URL.includes("PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE")) {
-        alert("Google Sheet link isn't set up yet. See the setup instructions at the bottom of this file's source code.");
-        return;
-    }
+    const btn = document.getElementById("confirmBtn");
+    const status = document.getElementById("sheetStatus");
+    btn.disabled = true; status.className = "sheet-status sending"; status.innerText = "Saving to Google Sheet..."; status.style.display = "block";
 
-    const confirmBtn = document.getElementById("confirmBtn");
-    const sheetStatus = document.getElementById("sheetStatus");
-
-    confirmBtn.disabled = true;
-    confirmBtn.innerText = "Sending...";
-    sheetStatus.className = "sheet-status sending";
-    sheetStatus.innerText = "Saving order to Google Sheet...";
-    sheetStatus.style.display = "block";
-
-    fetch(GOOGLE_SCRIPT_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify(lastQuoteData)
-    })
-    .then(() => {
-        // mode:no-cors means we can't read the actual response,
-        // so a successful fetch (no network error) is treated as success.
-        sheetStatus.className = "sheet-status success";
-        sheetStatus.innerText = "✅ Order saved for " + lastQuoteData.customerName + ".";
-        confirmBtn.innerText = "✅ Order Confirmed";
-    })
-    .catch(() => {
-        sheetStatus.className = "sheet-status error";
-        sheetStatus.innerText = "⚠ Could not reach Google Sheet. Check your internet connection or the script URL.";
-        confirmBtn.disabled = false;
-        confirmBtn.innerText = "✅ Confirm Order";
-    });
+    fetch(GOOGLE_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(lastQuoteData) })
+    .then(() => { status.className = "sheet-status success"; status.innerText = "✅ Order saved successfully!"; btn.innerText = "✅ Order Confirmed"; })
+    .catch(() => { status.className = "sheet-status error"; status.innerText = "❌ Failed to connect to spreadsheet pipeline."; btn.disabled = false; });
 }
 
 function resetForm() {
-    document.getElementById("customerName").value = "";
-    document.getElementById("customerContact").value = "";
-    document.getElementById("workpieceMaterial").value = "";
-    document.getElementById("recDisplay").style.display = "none";
-
-    document.getElementById("toolCategory").value = "flatendmill";
-    updateFluteOptions();
-
-    document.getElementById("material").value = "carbide";
-    document.getElementById("coatingType").value = "NONE";
-    toggleLengthInput();
-
-    document.getElementById("diameter").value = "";
-    document.getElementById("length").value = "";
-    document.getElementById("transport").value = "";
-    document.getElementById("quantity").value = "1";
-
-    document.getElementById("limitWarning").style.display = "none";
-    document.getElementById("results").style.display = "none";
-
-    const confirmBtn = document.getElementById("confirmBtn");
-    confirmBtn.style.display = "none";
-    confirmBtn.disabled = false;
-    confirmBtn.innerText = "✅ Confirm Order";
-    document.getElementById("shareBtn").style.display = "none";
-    document.getElementById("sheetStatus").style.display = "none";
-    lastQuoteData = null;
+    document.getElementById("customerName").value = ""; document.getElementById("customerContact").value = ""; document.getElementById("workpieceMaterial").value = "";
+    document.getElementById("toolCategory").value = "flatendmill"; updateFluteOptions(); document.getElementById("coatingType").value = "NONE"; toggleLengthInput();
+    document.getElementById("diameter").value = ""; document.getElementById("length").value = ""; document.getElementById("transport").value = ""; document.getElementById("quantity").value = "1";
+    document.getElementById("results").style.display = "none"; document.getElementById("confirmBtn").style.display = "none"; document.getElementById("shareBtn").style.display = "none";
+    document.getElementById("sheetStatus").style.display = "none"; lastQuoteData = null;
 }
 
-// Initial Bootup Sequence
 updateFluteOptions();
 toggleLengthInput();
 loadPricesFromSheets();
 </script>
-
-<!--
-============================================================
-GOOGLE SHEET SETUP INSTRUCTIONS (one-time setup)
-============================================================
-
-1. Create (or open) a Google Sheet for your order log.
-   In Row 1, add these column headers exactly in this order:
-   Customer Name | Contact Number | Date | Time | Tool Category | Flutes |
-   Material | Coating | Diameter (mm) | Quantity | Total Length (mm) |
-   Resharpening Total | Coating Total | Transportation Charges | Grand Bill
-
-2. In that Sheet, go to Extensions > Apps Script.
-   Delete any starter code and paste this:
-
-   function doPost(e) {
-     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-     var data = JSON.parse(e.postData.contents);
-     sheet.appendRow([
-       data.customerName,
-       data.customerContact,
-       data.date,
-       data.time,
-       data.toolCategory,
-       data.flutes,
-       data.material,
-       data.coating,
-       data.diameter,
-       data.quantity,
-       data.totalLength,
-       data.resharpeningTotal,
-       data.coatingTotal,
-       data.transportCost,
-       data.grandTotal
-     ]);
-     return ContentService.createTextOutput(JSON.stringify({status: "success"}))
-       .setMimeType(ContentService.MimeType.JSON);
-   }
-
-3. Click Deploy > New deployment.
-   - Select type: Web app
-   - Execute as: Me
-   - Who has access: Anyone
-   Click Deploy, and authorize the permissions it asks for.
-
-4. Copy the "Web app URL" it gives you.
-
-5. Back in this HTML file, find this line near the top of the <script> tag:
-   const GOOGLE_SCRIPT_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
-   Replace the placeholder text with the URL you copied (keep the quotes).
-
-6. Save the file. The Confirm Order button will now write a new row
-   to your Google Sheet every time it's pressed.
-
-Note: every time you edit the Apps Script code itself later, you must
-create a "New deployment" again (or manage existing deployment > edit)
-for the changes to take effect on the same URL.
-============================================================
-
-============================================================
-LIVE PRICE SHEET SETUP (one-time setup) - separate from the
-order-log sheet above. This lets you edit prices in Google Sheets
-without ever touching this file again.
-============================================================
-
-You need TWO separate Google Sheets for this (do not reuse the
-order-log sheet from above):
-
---- SHEET A: RESHARPENING PRICES ---
-
-Good news: you can publish your EXISTING RESHARPENING_PRICE_LIST.xlsx directly.
-No reformatting needed. The app reads your exact Excel layout (section headers,
-FLUTES row, and per-diameter grid). Just publish it as CSV and link it below.
-
---- SHEET B: COATING PRICES ---
-
-Same for your COATING_PRICE_LIST.xlsx - publish it directly as CSV.
-The app automatically detects and skips the title/description rows at the top
-and reads the price grid from there. Footer rows with multiplier notes are
-also automatically ignored.
-
---- PUBLISHING EACH SHEET AS CSV (do this for BOTH sheets) ---
-
-1. In each Google Sheet, go to File > Share > Publish to web.
-2. Under "Link", make sure it's set to publish the correct single
-   sheet (not "Entire Document" if you have multiple tabs).
-3. Change the format dropdown from "Web page" to "Comma-separated
-   values (.csv)".
-4. Click Publish, confirm if prompted.
-5. Copy the link it gives you (looks like
-   https://docs.google.com/spreadsheets/d/e/.../pub?output=csv)
-
-6. Back in this HTML file, find these two lines near the top of the
-   <script> tag:
-   const RESHARPENING_CSV_URL = "PASTE_YOUR_RESHARPENING_SHEET_CSV_URL_HERE";
-   const COATING_CSV_URL = "PASTE_YOUR_COATING_SHEET_CSV_URL_HERE";
-   Replace each placeholder with the matching published CSV link.
-
-7. Save the file. From now on, every time the app is opened it will
-   pull the latest prices from these two sheets automatically. You can
-   also tap "🔄 Refresh Prices" inside the app to re-fetch without
-   reloading the whole page.
-
-NOTES:
-- Google's "Publish to web" can take a few minutes to reflect a fresh
-  edit. If you change a price and it's not showing up immediately,
-  wait a minute or two and tap Refresh Prices again.
-- If the app can't reach the internet or the sheets, it automatically
-  falls back to the last successfully fetched prices (saved on the
-  device), and if that's never happened either, falls back to the
-  built-in defaults baked into this file.
-- These two price sheets are separate from your RESHARPENING order-log
-  sheet used by the Confirm Order button - don't mix them up.
-============================================================
--->
-
 </body>
 </html>
