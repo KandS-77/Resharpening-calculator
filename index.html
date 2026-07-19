@@ -11,7 +11,8 @@
         h2 { margin-top: 0; color: #1a365d; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; font-size: 20px; display: flex; align-items: center; gap: 8px;}
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; font-size: 16px; background-color: #fff; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; font-size: 16px; background-color: #fff; }
+        textarea { resize: vertical; font-family: inherit; }
         button { width: 100%; background-color: #3182ce; color: white; border: none; padding: 12px; font-size: 18px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 5px; }
         button:hover { background-color: #2b6cb0; }
         .rec-box { background-color: #f0fff4; border-left: 4px solid #38a169; padding: 12px; border-radius: 6px; margin-top: 10px; font-size: 14px; display: none; }
@@ -27,7 +28,7 @@
         .reset-button:hover { background-color: #cbd5e0; }
         .share-button { background-color: #25D366; margin-top: 10px; display: none; }
         .share-button:hover { background-color: #1ebe57; }
-        .confirm-button { background-color: #38a169; margin-top: 12px; display: none; }
+        .confirm-button { background-color: #38a169; margin-top: 12px; }
         .confirm-button:hover { background-color: #2f855a; }
         .confirm-button:disabled { background-color: #9ae6b4; cursor: not-allowed; }
         .sheet-status { margin-top: 10px; padding: 10px; border-radius: 6px; font-size: 14px; display: none; }
@@ -47,7 +48,17 @@
         .price-status.warning { background-color: #fffaf0; color: #9c4221; border-left: 4px solid #dd6b20; }
         .refresh-button { background-color: #edf2f7; color: #2d3748; font-size: 14px; padding: 8px; margin-top: 0; margin-bottom: 15px; }
         .refresh-button:hover { background-color: #e2e8f0; }
-        .cancel-btn { background: #fff; color: #e53e3e; text-align: center; border: none; margin-top: 8px; }
+        .add-basket-btn { background-color: #805ad5; margin-top:10px; display:none; }
+        .add-basket-btn:hover { background-color: #6b46c1; }
+        .basket-item { display:flex; justify-content:space-between; align-items:center; padding:10px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:8px; font-size:14px; }
+        .basket-item-info { flex:1; }
+        .basket-item-info strong { display:block; font-size:15px; color:#1a365d; }
+        .basket-item-info span { color:#718096; font-size:13px; }
+        .basket-item-price { font-weight:bold; color:#2c5282; margin:0 12px; white-space:nowrap; }
+        .basket-remove { background:#e53e3e; color:white; border:none; border-radius:6px; padding:6px 10px; cursor:pointer; font-size:13px; font-weight:bold; }
+        .basket-remove:hover { background:#c53030; }
+        .basket-summary { background:#f7fafc; border-radius:8px; padding:12px; margin-top:8px; margin-bottom:12px; }
+        .basket-summary .total-line { display:flex; justify-content:space-between; font-size:16px; font-weight:bold; color:#1a202c; margin-top:6px; padding-top:6px; border-top:2px solid #e2e8f0; }
     </style>
 </head>
 <body>
@@ -55,7 +66,11 @@
     <div class="card">
         <h2>🎯 Which Coating Do I Need?</h2>
         <div class="form-group"><label>Customer Name</label><input type="text" id="customerName" placeholder="e.g. Patel Engineering"></div>
-        <div class="form-group"><label>Contact Number</label><input type="tel" id="customerContact" inputmode="tel" placeholder="e.g. 9876543210"></div>
+        <!-- Changed: Added maxlength="10" and sliced value to 10 characters max -->
+        <div class="form-group">
+            <label>Contact Number</label>
+            <input type="tel" id="customerContact" inputmode="numeric" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="e.g. 9876543210">
+        </div>
         <div class="form-group">
             <label>Workpiece Material / Application</label>
             <select id="workpieceMaterial" onchange="getRecommendation()">
@@ -89,6 +104,35 @@
             </select>
         </div>
         <div class="form-group"><label>Flutes</label><select id="flutes"></select></div>
+
+        <div class="form-group" id="drillAngleGroup" style="display:none;">
+            <label>Drill Point Angle</label>
+            <input type="text" id="drillAngle" list="drillAngleList" placeholder="e.g. 118° or type custom angle">
+            <datalist id="drillAngleList">
+                <option value="118°">118° — General Purpose</option>
+                <option value="135°">135° — Self-Centering / Hard Materials</option>
+                <option value="140°">140°</option>
+                <option value="150°">150°</option>
+                <option value="90°">90° — Countersink</option>
+            </datalist>
+        </div>
+
+        <div class="form-group" id="cornerRadiusGroup" style="display:none;">
+            <label>Corner Radius (mm)</label>
+            <input type="text" id="cornerRadius" list="cornerRadiusList" placeholder="e.g. R0.5 or type custom radius">
+            <datalist id="cornerRadiusList">
+                <option value="R0.2"></option>
+                <option value="R0.3"></option>
+                <option value="R0.5"></option>
+                <option value="R1.0"></option>
+                <option value="R1.5"></option>
+                <option value="R2.0"></option>
+                <option value="R2.5"></option>
+                <option value="R3.0"></option>
+                <option value="R4.0"></option>
+                <option value="R5.0"></option>
+            </datalist>
+        </div>
         <div class="form-group">
             <label>Tool Substrate Material</label>
             <select id="material">
@@ -110,15 +154,17 @@
             </select>
         </div>
         <div class="form-row">
-            <div class="form-group"><label>Diameter (mm) — Max 20mm</label><input type="number" id="diameter" inputmode="decimal" placeholder="e.g. 12" step="any" min="3" max="20"></div>
+            <div class="form-group"><label>Diameter (mm) — Max 20mm *</label><input type="number" id="diameter" inputmode="decimal" placeholder="e.g. 12" step="any" min="3" max="20"></div>
             <div class="form-group"><label>Quantity</label><input type="number" id="quantity" inputmode="numeric" placeholder="e.g. 1" step="1" min="1" value="1"></div>
         </div>
         <div class="form-group" id="lengthGroup" style="display:none;"><label>Total Length (mm)</label><input type="number" id="length" inputmode="decimal" placeholder="e.g. 75" step="any" min="1"></div>
         <div class="form-group"><label>Transportation Charges</label><input type="number" id="transport" inputmode="decimal" placeholder="e.g. 100 (leave blank if none)" step="any" min="0"></div>
+        <div class="form-group"><label>Comments / Special Instructions</label><textarea id="comments" rows="3" placeholder="e.g. chipped edge on flute 2, urgent delivery, special geometry needed..."></textarea></div>
         <div class="limit-warning" id="limitWarning"></div>
         <button onclick="calculateQuote()">Calculate Invoice Price</button>
         <button class="reset-button" onclick="resetForm()">↺ Reset / New Quote</button>
-        <button class="share-button" id="shareBtn" onclick="shareQuote()">📤 Share Quote with Customer</button>
+        <button class="share-button" id="shareBtn" onclick="shareQuote()" style="display:none;">📤 Share This Tool Only</button>
+        <button class="add-basket-btn" id="addBasketBtn" onclick="addToBasket()" style="display:none;">➕ Add to Order Basket</button>
         <div class="result-box" id="results">
             <div class="result-row muted-row"><span>Quantity:</span><span id="qtyDisplay">1</span></div>
             <div class="result-row"><span>Resharpening (Total):</span><span id="resCost">₹0.00</span></div>
@@ -130,8 +176,19 @@
             <div class="result-row muted-row"><span>Round Off:</span><span id="roundOff">₹0.00</span></div>
             <div class="result-row total-row" style="font-size:20px;color:#1a202c;"><span>Total Grand Bill:</span><span id="grandTotal">₹0.00</span></div>
         </div>
-        <button class="confirm-button" id="confirmBtn" onclick="confirmOrder()">✅ Confirm Order</button>
+        <button class="confirm-button" id="confirmBtn" style="display:none;" onclick="confirmOrder()">✅ Confirm Order</button>
         <div class="sheet-status" id="sheetStatus"></div>
+    </div>
+
+    <!-- ORDER BASKET — appears when at least one tool has been added -->
+    <div class="card" id="basketCard" style="display:none;">
+        <h2>🛒 Order Basket</h2>
+        <div id="basketItems"></div>
+        <div class="basket-summary" id="basketSummary"></div>
+        <button class="confirm-button" id="confirmBasketBtn" onclick="confirmFullOrder()">✅ Confirm Full Order</button>
+        <button class="share-button" style="display:block;margin-top:10px;" onclick="shareFullOrder()">📤 Share Full Quote</button>
+        <button class="reset-button" style="margin-top:10px;" onclick="clearBasket()">🗑 Clear Basket</button>
+        <div class="sheet-status" id="basketStatus"></div>
     </div>
 </div>
 
@@ -152,8 +209,6 @@ const CACHE_KEY_RESHARPENING = "kands_resharpening_price_cache";
 const CACHE_KEY_COATING      = "kands_coating_price_cache";
 const MAX_RESHARPEN_DIA      = 20;
 
-// Compact fallback coating data — 3 arrays instead of a big named object.
-// Matches prices.json exactly. GitHub can handle this size easily.
 const _FD = [3,4,6,8,10,12,14,16,18,20,22,26,30,32,35,40,50];
 const _FL = [50,75,100,150,200,300,400,500];
 const _FP = [
@@ -176,7 +231,6 @@ const _FP = [
     [691.15,1760.65,1902.1,3516.7,3691.5,4279.15,5557.95,15403.1]
 ];
 
-// Live price variables — initialised from compact defaults above
 let RESHARPENING_TABLE = {};
 let coatingLengths     = _FL.slice();
 let coatingDiameters   = _FD.slice();
@@ -190,8 +244,9 @@ const COATING_CLEAN_NAMES = {
     OPTURA:"BALINIT OPTURA",               TISINOS_PRO:"BALIQ TISINOS PRO"
 };
 
-let lastQuoteData = null;
+let lastQuoteData    = null;
 let pendingShareText = null;
+let orderBasket      = [];
 
 async function loadPricesFromSheets() {
     const statusEl = document.getElementById("priceStatus");
@@ -217,7 +272,6 @@ async function loadPricesFromSheets() {
         return;
     } catch (err) { console.warn("prices.json fetch failed:", err.message); }
 
-    // Fetch failed — try device cache (defaults already loaded so calculator still works)
     const cachedResh = localStorage.getItem(CACHE_KEY_RESHARPENING);
     const cachedCoat = localStorage.getItem(CACHE_KEY_COATING);
     if (cachedResh && cachedCoat) {
@@ -252,7 +306,6 @@ function getRecommendation() {
     toggleLengthInput();
 }
 
-// Resharpening lookup: uses live table if loaded, otherwise compact bracket rules
 function getResharpeningPrice(category, flutes, dia) {
     const d = Math.ceil(dia);
     if (RESHARPENING_TABLE[category]) {
@@ -263,7 +316,6 @@ function getResharpeningPrice(category, flutes, dia) {
             return Number(m !== undefined ? fd[m] : fd[dias[dias.length - 1]]);
         }
     }
-    // Compact bracket fallback — no big table needed
     if (category === "flatendmill" || category === "radiusendmill")
         return flutes <= 3 ? (d<=6?50:d<=12?70:d<=16?100:160) : (d<=6?55:d<=12?75:d<=16?110:170);
     if (category === "ballnose") return d<=6?60:d<=12?80:d<=16?110:170;
@@ -279,6 +331,9 @@ function updateFluteOptions() {
     if (cat==="ballnose") opts=[2,4]; else if (cat==="drill") opts=[2]; else if (cat==="chamfer") opts=[2,3];
     opts.forEach(f => { const o=document.createElement("option"); o.value=f; o.innerText=f+" Flutes"; sel.appendChild(o); });
     if (opts.includes(parseInt(prev))) sel.value = prev;
+
+    document.getElementById("drillAngleGroup").style.display   = cat === "drill"        ? "block" : "none";
+    document.getElementById("cornerRadiusGroup").style.display = cat === "radiusendmill" ? "block" : "none";
 }
 
 function toggleLengthInput() {
@@ -286,6 +341,8 @@ function toggleLengthInput() {
 }
 
 function calculateQuote() {
+    const customerName = document.getElementById("customerName").value.trim() || "(No name)";
+
     const cat=document.getElementById("toolCategory").value, flutes=parseInt(document.getElementById("flutes").value||2);
     const material=document.getElementById("material").value, coating=document.getElementById("coatingType").value;
     const inputDia=parseFloat(document.getElementById("diameter").value);
@@ -295,12 +352,12 @@ function calculateQuote() {
 
     lw.style.display="none";
     document.getElementById("confirmBtn").style.display="none";
+    document.getElementById("addBasketBtn").style.display="none";
     document.getElementById("shareBtn").style.display="none";
-    document.getElementById("sheetStatus").style.display="none";
     lastQuoteData=null;
 
-    if (isNaN(inputDia)) { alert("Please enter a valid diameter."); return; }
-    if (coating!=="NONE"&&isNaN(inputLen)) { alert("Please enter the tool length for coating."); return; }
+    if (isNaN(inputDia)) { alert("Please enter a valid tool diameter."); return; }
+    if (coating!=="NONE"&&isNaN(inputLen)) { alert("Please enter the tool length for coating calculations."); return; }
     if (isNaN(inputQty)||inputQty<1) { alert("Please enter a valid quantity (minimum 1)."); return; }
     if (inputDia>MAX_RESHARPEN_DIA) {
         lw.innerText="⚠ Diameter exceeds machine capacity (max "+MAX_RESHARPEN_DIA+"mm).";
@@ -330,8 +387,11 @@ function calculateQuote() {
     const totalResh=resharpeningUnit*inputQty, totalCoat=modifiedCoatingUnit*inputQty;
     const transport=parseFloat(document.getElementById("transport").value)||0;
     const subtotal=totalResh+totalCoat, gst=subtotal*0.18;
-    const grandRaw=subtotal+gst+transport, grandRounded=Math.round(grandRaw);
-    const roundOff=grandRounded-grandRaw;
+    const grandRaw=subtotal+gst+transport;
+    const grandRounded=Math.round(grandRaw);
+    
+    const roundOff = (grandRounded - grandRaw).toFixed(2);
+    const parsedRoundOff = parseFloat(roundOff);
 
     document.getElementById("qtyDisplay").innerText=""+inputQty;
     document.getElementById("resCost").innerText="₹"+totalResh.toFixed(2);
@@ -340,13 +400,13 @@ function calculateQuote() {
     document.getElementById("subtotal").innerText="₹"+subtotal.toFixed(2);
     document.getElementById("gst").innerText="₹"+gst.toFixed(2);
     document.getElementById("transportDisplay").innerText="₹"+transport.toFixed(2);
-    document.getElementById("roundOff").innerText=(roundOff>=0?"+₹":"-₹")+Math.abs(roundOff).toFixed(2);
+    document.getElementById("roundOff").innerText=(parsedRoundOff>=0?"+₹":"-₹")+Math.abs(parsedRoundOff).toFixed(2);
     document.getElementById("grandTotal").innerText="₹"+grandRounded.toFixed(2);
     document.getElementById("results").style.display="block";
 
     const now=new Date();
     lastQuoteData={
-        customerName: document.getElementById("customerName").value.trim()||"(No name)",
+        customerName: customerName,
         customerContact: document.getElementById("customerContact").value.trim()||"(No contact)",
         date: now.toLocaleDateString("en-IN"), time: now.toLocaleTimeString("en-IN"),
         toolCategory: document.getElementById("toolCategory").options[document.getElementById("toolCategory").selectedIndex].text,
@@ -354,13 +414,17 @@ function calculateQuote() {
         material: document.getElementById("material").options[document.getElementById("material").selectedIndex].text,
         coating: COATING_CLEAN_NAMES[coating]||coating,
         coatingCode: coating, diameter: inputDia, quantity: inputQty,
+        drillAngle:  cat === "drill"         ? document.getElementById("drillAngle").value  : "",
+        cornerRadius:cat === "radiusendmill"  ? document.getElementById("cornerRadius").value : "",
         totalLength: coating!=="NONE"?inputLen:"N/A",
         resharpeningTotal: totalResh.toFixed(2), coatingTotal: totalCoat.toFixed(2),
         subtotal: subtotal.toFixed(2), gst: gst.toFixed(2),
-        transportCost: transport.toFixed(2), grandTotal: grandRounded.toFixed(2)
+        transportCost: transport.toFixed(2), grandTotal: grandRounded.toFixed(2),
+        comments: document.getElementById("comments").value.trim()
     };
-    document.getElementById("confirmBtn").style.display="block";
-    document.getElementById("shareBtn").style.display="block";
+    document.getElementById("confirmBtn").style.display  = "none";
+    document.getElementById("addBasketBtn").style.display = "block";
+    document.getElementById("shareBtn").style.display     = "block";
 }
 
 function buildQuoteText() {
@@ -369,12 +433,16 @@ function buildQuoteText() {
         "Customer : "+q.customerName,"Date     : "+q.date,"",
         "Tool     : "+q.toolCategory+" ("+q.flutes+" Flutes)",
         "Coating  : "+q.coating,"Diameter : "+q.diameter+" mm","Quantity : "+q.quantity];
+    if (q.drillAngle)   lines.push("Drill Angle   : "+q.drillAngle);
+    if (q.cornerRadius) lines.push("Corner Radius : "+q.cornerRadius);
     if (q.totalLength!=="N/A") lines.push("Length   : "+q.totalLength+" mm");
     lines.push("","Resharpening : ₹"+q.resharpeningTotal);
     if (parseFloat(q.coatingTotal)>0) lines.push("Coating      : ₹"+q.coatingTotal);
     lines.push("Subtotal     : ₹"+q.subtotal,"GST (18%)    : ₹"+q.gst);
     if (parseFloat(q.transportCost)>0) lines.push("Transport    : ₹"+q.transportCost);
-    lines.push("-----------------------------","*Total Amount : ₹"+q.grandTotal+"*","","Thank you for choosing us!");
+    lines.push("-----------------------------","*Total Amount : ₹"+q.grandTotal+"*");
+    if (q.comments) lines.push("","Note : "+q.comments);
+    lines.push("","Thank you for choosing us!");
     return lines.join("\n");
 }
 
@@ -407,7 +475,7 @@ function confirmOrder() {
 }
 
 function resetForm() {
-    ["customerName","customerContact","diameter","length","transport"].forEach(id=>document.getElementById(id).value="");
+    ["customerName","customerContact","diameter","length","transport","drillAngle","cornerRadius","comments"].forEach(id=>document.getElementById(id).value="");
     document.getElementById("quantity").value="1";
     document.getElementById("workpieceMaterial").value="";
     document.getElementById("recDisplay").style.display="none";
@@ -416,10 +484,132 @@ function resetForm() {
     document.getElementById("results").style.display="none";
     document.getElementById("limitWarning").style.display="none";
     document.getElementById("confirmBtn").style.display="none";
+    document.getElementById("addBasketBtn").style.display="none";
     document.getElementById("shareBtn").style.display="none";
     document.getElementById("sheetStatus").style.display="none";
     const btn=document.getElementById("confirmBtn"); btn.disabled=false; btn.innerText="✅ Confirm Order";
     lastQuoteData=null;
+}
+
+function addToBasket() {
+    if (!lastQuoteData) return;
+    orderBasket.push(Object.assign({}, lastQuoteData));
+    renderBasket();
+
+    ["diameter","length","transport","drillAngle","cornerRadius","comments"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("quantity").value = "1";
+    document.getElementById("toolCategory").value = "flatendmill"; updateFluteOptions();
+    document.getElementById("coatingType").value = "NONE"; toggleLengthInput();
+    document.getElementById("results").style.display = "none";
+    document.getElementById("limitWarning").style.display = "none";
+    document.getElementById("confirmBtn").style.display = "none";
+    document.getElementById("addBasketBtn").style.display = "none";
+    document.getElementById("shareBtn").style.display = "none";
+    document.getElementById("sheetStatus").style.display = "none";
+    lastQuoteData = null;
+}
+
+function renderBasket() {
+    const card = document.getElementById("basketCard");
+    const itemsDiv = document.getElementById("basketItems");
+    const summaryDiv = document.getElementById("basketSummary");
+
+    if (orderBasket.length === 0) { card.style.display = "none"; return; }
+    card.style.display = "block";
+
+    itemsDiv.innerHTML = orderBasket.map((item, i) => {
+        const label = item.toolCategory + (item.drillAngle ? " " + item.drillAngle : "") + (item.cornerRadius ? " " + item.cornerRadius : "");
+        const detail = "⌀" + item.diameter + "mm × " + item.quantity + " | " + item.coating;
+        return '<div class="basket-item">' +
+            '<div class="basket-item-info"><strong>' + label + '</strong><span>' + detail + '</span></div>' +
+            '<div class="basket-item-price">₹' + item.grandTotal + '</div>' +
+            '<button class="basket-remove" onclick="removeFromBasket(' + i + ')">✕</button>' +
+            '</div>';
+    }).join("");
+
+    const orderTotal = orderBasket.reduce((sum, item) => sum + parseFloat(item.grandTotal), 0);
+    const customer = orderBasket[0].customerName;
+    summaryDiv.innerHTML =
+        '<div style="font-size:13px;color:#718096;margin-bottom:6px;">' + orderBasket.length + ' tool(s) for ' + customer + '</div>' +
+        '<div class="total-line"><span>Order Total:</span><span>₹' + Math.round(orderTotal) + '</span></div>';
+}
+
+function removeFromBasket(index) {
+    orderBasket.splice(index, 1);
+    renderBasket();
+}
+
+function clearBasket() {
+    if (orderBasket.length > 0 && !confirm("Clear all " + orderBasket.length + " tool(s) from the basket?")) return;
+    orderBasket = [];
+    renderBasket();
+    document.getElementById("basketStatus").style.display = "none";
+    const btn = document.getElementById("confirmBasketBtn");
+    btn.disabled = false; btn.innerText = "✅ Confirm Full Order";
+}
+
+function confirmFullOrder() {
+    if (orderBasket.length === 0) return;
+    const btn = document.getElementById("confirmBasketBtn");
+    const status = document.getElementById("basketStatus");
+    btn.disabled = true; status.className = "sheet-status sending";
+    status.innerText = "Saving " + orderBasket.length + " tool(s) to Google Sheet...";
+    status.style.display = "block";
+
+    const orderId = "ORD-" + Date.now();
+    const promises = orderBasket.map(item =>
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST", mode: "no-cors",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify(Object.assign({}, item, { orderId }))
+        })
+    );
+    Promise.all(promises)
+        .then(() => {
+            status.className = "sheet-status success";
+            status.innerText = "✅ " + orderBasket.length + " tool(s) saved for " + orderBasket[0].customerName + " (Order: " + orderId + ")";
+            btn.innerText = "✅ Order Confirmed";
+        })
+        .catch(() => {
+            status.className = "sheet-status error";
+            status.innerText = "❌ Could not reach Google Sheet. Please try again.";
+            btn.disabled = false;
+        });
+}
+
+function shareFullOrder() {
+    if (orderBasket.length === 0) return;
+    const q0 = orderBasket[0];
+    const lines = ["*K&S ENGINEERING WORKS*", "Resharpening & Recoating Quotation", "",
+        "Customer : " + q0.customerName, "Date     : " + q0.date, ""];
+
+    let orderTotal = 0;
+    orderBasket.forEach((item, i) => {
+        lines.push("── Tool " + (i + 1) + ": " + item.toolCategory + " ──");
+        if (item.drillAngle)   lines.push("  Drill Angle   : " + item.drillAngle);
+        if (item.cornerRadius) lines.push("  Corner Radius : " + item.cornerRadius);
+        lines.push("  Coating  : " + item.coating);
+        lines.push("  Diameter : " + item.diameter + " mm  |  Qty: " + item.quantity);
+        if (item.totalLength !== "N/A") lines.push("  Length   : " + item.totalLength + " mm");
+        lines.push("  Amount   : ₹" + item.grandTotal);
+        if (item.comments) lines.push("  Note     : " + item.comments);
+        lines.push("");
+        orderTotal += parseFloat(item.grandTotal);
+    });
+
+    lines.push("=============================");
+    lines.push("*Total Order Amount : ₹" + Math.round(orderTotal) + "*");
+    lines.push("", "Thank you for choosing us!");
+
+    const text = lines.join("\n");
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.querySelector("#basketCard .share-button");
+            const orig = btn.innerText;
+            btn.innerText = "✅ Copied! Paste into WhatsApp";
+            setTimeout(() => { btn.innerText = orig; }, 3000);
+        }).catch(() => openShareModal(text));
+    } else { openShareModal(text); }
 }
 
 updateFluteOptions();
