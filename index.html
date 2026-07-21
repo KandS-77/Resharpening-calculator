@@ -403,7 +403,6 @@
                 setConfirmBasketDisabled(false);
             };
 
-            // FIXED Google Sheets save for single item: Generates and logs unique orderId
             const confirmOrder = () => {
                 if (!calculatedQuote) return;
                 setConfirmSingleDisabled(true);
@@ -460,7 +459,6 @@
                 });
             };
 
-            // WhatsApp Share Formatting (Pre-GST totals + "GST extra")
             const buildQuoteText = (q) => {
                 const subtotalVal = parseFloat(q.subtotal) || 0;
                 const transportVal = parseFloat(q.transportCost) || 0;
@@ -645,7 +643,7 @@
                                 <option value="">-- Tap to choose workpiece requirement --</option>
                                 <option value="hardened_high">Hardened Steel / High-Temp Alloys (Up to 70 HRC)</option>
                                 <option value="stainless">Stainless Steel / Tough Steels</option>
-                                <option value="aluminium">Aluminium & Alloys (<12% Si) / Copper / Brass</option>
+                                <option value="aluminium">Aluminium & Alloys (&lt;12% Si) / Copper / Brass</option>
                                 <option value="drilling_steel">General Drilling / Deep-Hole Steel Drilling</option>
                                 <option value="universal">General Purpose / Allrounder (Milling & Turning)</option>
                                 <option value="hardened_drills_reamers">Hardened Steel – Stick Blades / Drills / Reamers (45–72 HRC)</option>
