@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tool Pricing & Recommendation Calculator</title>
+    <title>Tool Pricing & Recommendation Calculator — K&S Engineering Works</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f4f6f9; margin: 0; padding: 15px; color: #333; }
         .container { max-width: 500px; margin: auto; display: flex; flex-direction: column; gap: 20px; }
@@ -63,6 +63,7 @@
 </head>
 <body>
 <div class="container">
+    <!-- Card 1: recommendation -->
     <div class="card">
         <h2>🎯 Which Coating Do I Need?</h2>
         <div class="form-group"><label>Customer Name</label><input type="text" id="customerName" placeholder="e.g. Patel Engineering"></div>
@@ -85,6 +86,7 @@
         </div>
     </div>
 
+    <!-- Card 2: input specifications and calculation -->
     <div class="card">
         <h2>📐 Quote & Dimension Settings</h2>
         <div class="price-status" id="priceStatus" style="display:none;"></div>
@@ -158,10 +160,12 @@
         <div class="form-group"><label>Transportation Charges</label><input type="number" id="transport" inputmode="decimal" placeholder="e.g. 100 (leave blank if none)" step="any" min="0"></div>
         <div class="form-group"><label>Comments / Special Instructions</label><textarea id="comments" rows="3" placeholder="e.g. chipped edge on flute 2, urgent delivery, special geometry needed..."></textarea></div>
         <div class="limit-warning" id="limitWarning"></div>
+        
         <button onclick="calculateQuote()">Calculate Invoice Price</button>
         <button class="reset-button" onclick="resetForm()">↺ Reset / New Quote</button>
         <button class="share-button" id="shareBtn" onclick="shareQuote()" style="display:none;">📤 Share This Tool Only</button>
         <button class="add-basket-btn" id="addBasketBtn" onclick="addToBasket()" style="display:none;">➕ Add to Order Basket</button>
+        
         <div class="result-box" id="results">
             <div class="result-row muted-row"><span>Quantity:</span><span id="qtyDisplay">1</span></div>
             <div class="result-row"><span>Resharpening (Total):</span><span id="resCost">₹0.00</span></div>
@@ -173,22 +177,24 @@
             <div class="result-row muted-row"><span>Round Off:</span><span id="roundOff">₹0.00</span></div>
             <div class="result-row total-row" style="font-size:20px;color:#1a202c;"><span>Total Grand Bill:</span><span id="grandTotal">₹0.00</span></div>
         </div>
+        
         <button class="confirm-button" id="confirmBtn" onclick="confirmOrder()">✅ Confirm Order</button>
         <div class="sheet-status" id="sheetStatus"></div>
     </div>
 
-    <!-- ORDER BASKET — appears when at least one tool has been added -->
+    <!-- ORDER BASKET -->
     <div class="card" id="basketCard" style="display:none;">
         <h2>🛒 Order Basket</h2>
         <div id="basketItems"></div>
         <div class="basket-summary" id="basketSummary"></div>
-        <button class="confirm-button" id="confirmBasketBtn" onclick="confirmFullOrder()">✅ Confirm Full Order</button>
+        <button class="confirm-button" id="confirmBasketBtn" onclick="confirmFullOrder()" style="display:block;">✅ Confirm Full Order</button>
         <button class="share-button" style="display:block;margin-top:10px;" onclick="shareFullOrder()">📤 Share Full Quote</button>
         <button class="reset-button" style="margin-top:10px;" onclick="clearBasket()">🗑 Clear Basket</button>
         <div class="sheet-status" id="basketStatus"></div>
     </div>
 </div>
 
+<!-- Modal Dialog for sharing options -->
 <div class="share-modal-backdrop" id="shareModalBackdrop" onclick="closeShareModal()">
     <div class="share-modal-box" onclick="event.stopPropagation()">
         <h3>Share Quote Via</h3>
@@ -206,8 +212,7 @@ const CACHE_KEY_RESHARPENING = "kands_resharpening_price_cache";
 const CACHE_KEY_COATING      = "kands_coating_price_cache";
 const MAX_RESHARPEN_DIA      = 20;
 
-// Compact fallback coating data — 3 arrays instead of a big named object.
-// Matches prices.json exactly. GitHub can handle this size easily.
+// Compact fallback coating data
 const _FD = [3,4,6,8,10,12,14,16,18,20,22,26,30,32,35,40,50];
 const _FL = [50,75,100,150,200,300,400,500];
 const _FP = [
@@ -230,7 +235,6 @@ const _FP = [
     [691.15,1760.65,1902.1,3516.7,3691.5,4279.15,5557.95,15403.1]
 ];
 
-// Live price variables — initialised from compact defaults above
 let RESHARPENING_TABLE = {};
 let coatingLengths     = _FL.slice();
 let coatingDiameters   = _FD.slice();
@@ -246,7 +250,7 @@ const COATING_CLEAN_NAMES = {
 
 let lastQuoteData    = null;
 let pendingShareText = null;
-let orderBasket      = [];  // all tools added for the current customer
+let orderBasket      = [];
 
 async function loadPricesFromSheets() {
     const statusEl = document.getElementById("priceStatus");
@@ -272,7 +276,6 @@ async function loadPricesFromSheets() {
         return;
     } catch (err) { console.warn("prices.json fetch failed:", err.message); }
 
-    // Fetch failed — try device cache (defaults already loaded so calculator still works)
     const cachedResh = localStorage.getItem(CACHE_KEY_RESHARPENING);
     const cachedCoat = localStorage.getItem(CACHE_KEY_COATING);
     if (cachedResh && cachedCoat) {
@@ -307,7 +310,6 @@ function getRecommendation() {
     toggleLengthInput();
 }
 
-// Resharpening lookup: uses live table if loaded, otherwise compact bracket rules
 function getResharpeningPrice(category, flutes, dia) {
     const d = Math.ceil(dia);
     if (RESHARPENING_TABLE[category]) {
@@ -318,7 +320,6 @@ function getResharpeningPrice(category, flutes, dia) {
             return Number(m !== undefined ? fd[m] : fd[dias[dias.length - 1]]);
         }
     }
-    // Compact bracket fallback — no big table needed
     if (category === "flatendmill" || category === "radiusendmill")
         return flutes <= 3 ? (d<=6?50:d<=12?70:d<=16?100:160) : (d<=6?55:d<=12?75:d<=16?110:170);
     if (category === "ballnose") return d<=6?60:d<=12?80:d<=16?110:170;
@@ -355,7 +356,6 @@ function calculateQuote() {
     const lw=document.getElementById("limitWarning");
 
     lw.style.display="none";
-    document.getElementById("confirmBtn").style.display="none";
     document.getElementById("confirmBtn").style.display="none";
     document.getElementById("addBasketBtn").style.display="none";
     document.getElementById("shareBtn").style.display="none";
@@ -407,11 +407,22 @@ function calculateQuote() {
     document.getElementById("results").style.display="block";
 
     const now=new Date();
+    
+    // Friendly UI Category labels
+    const categoryLabels = {
+        flatendmill: "Flat Endmill",
+        radiusendmill: "Radius Endmill",
+        ballnose: "Ball Nose Cutter",
+        drill: "Drill Bit",
+        chamfer: "Chamfering Knife",
+        chamfernew: "Chamfering Knife New"
+    };
+
     lastQuoteData={
         customerName: document.getElementById("customerName").value.trim()||"(No name)",
         customerContact: document.getElementById("customerContact").value.trim()||"(No contact)",
         date: now.toLocaleDateString("en-IN"), time: now.toLocaleTimeString("en-IN"),
-        toolCategory: document.getElementById("toolCategory").options[document.getElementById("toolCategory").selectedIndex].text,
+        toolCategory: categoryLabels[cat] || cat,
         flutes: flutes,
         material: document.getElementById("material").options[document.getElementById("material").selectedIndex].text,
         coating: COATING_CLEAN_NAMES[coating]||coating,
@@ -424,13 +435,19 @@ function calculateQuote() {
         transportCost: transport.toFixed(2), grandTotal: grandRounded.toFixed(2),
         comments: document.getElementById("comments").value.trim()
     };
-    document.getElementById("confirmBtn").style.display  = "none";
+    
+    document.getElementById("confirmBtn").style.display  = "block";
     document.getElementById("addBasketBtn").style.display = "block";
     document.getElementById("shareBtn").style.display     = "block";
 }
 
+// WhatsApp Quote String Builder with pre-GST values and "+ GST" label
 function buildQuoteText() {
     const q=lastQuoteData;
+    const subtotalVal = parseFloat(q.subtotal) || 0;
+    const transportVal = parseFloat(q.transportCost) || 0;
+    const totalWithoutGst = subtotalVal + transportVal;
+
     const lines=["*K&S ENGINEERING WORKS*","Resharpening & Recoating Quotation","",
         "Customer : "+q.customerName,"Date     : "+q.date,"",
         "Tool     : "+q.toolCategory+" ("+q.flutes+" Flutes)",
@@ -440,9 +457,9 @@ function buildQuoteText() {
     if (q.totalLength!=="N/A") lines.push("Length   : "+q.totalLength+" mm");
     lines.push("","Resharpening : ₹"+q.resharpeningTotal);
     if (parseFloat(q.coatingTotal)>0) lines.push("Coating      : ₹"+q.coatingTotal);
-    lines.push("Subtotal     : ₹"+q.subtotal,"GST (18%)    : ₹"+q.gst);
-    if (parseFloat(q.transportCost)>0) lines.push("Transport    : ₹"+q.transportCost);
-    lines.push("-----------------------------","*Total Amount : ₹"+q.grandTotal+"*");
+    lines.push("Subtotal     : ₹"+q.subtotal);
+    if (transportVal>0) lines.push("Transport    : ₹"+q.transportCost);
+    lines.push("-----------------------------","*Total Amount : ₹"+Math.round(totalWithoutGst)+" + GST*");
     if (q.comments) lines.push("","Note : "+q.comments);
     lines.push("","Thank you for choosing us!");
     return lines.join("\n");
@@ -498,7 +515,7 @@ function addToBasket() {
     orderBasket.push(Object.assign({}, lastQuoteData));
     renderBasket();
 
-    // Clear only tool fields — keep customer name and contact for next tool
+    // Clear tool-specific input fields only, keep client data
     ["diameter","length","transport","drillAngle","cornerRadius","comments"].forEach(id => document.getElementById(id).value = "");
     document.getElementById("quantity").value = "1";
     document.getElementById("toolCategory").value = "flatendmill"; updateFluteOptions();
@@ -534,7 +551,11 @@ function renderBasket() {
     const customer = orderBasket[0].customerName;
     summaryDiv.innerHTML =
         '<div style="font-size:13px;color:#718096;margin-bottom:6px;">' + orderBasket.length + ' tool(s) for ' + customer + '</div>' +
-        '<div class="total-line"><span>Order Total:</span><span>₹' + Math.round(orderTotal) + '</span></div>';
+        '<div class="total-line"><span>Order Total (Inc. GST):</span><span>₹' + Math.round(orderTotal) + '</span></div>';
+    
+    // Reset basket order button labels
+    const btn = document.getElementById("confirmBasketBtn");
+    btn.disabled = false; btn.innerText = "✅ Confirm Full Order";
 }
 
 function removeFromBasket(index) {
@@ -547,8 +568,6 @@ function clearBasket() {
     orderBasket = [];
     renderBasket();
     document.getElementById("basketStatus").style.display = "none";
-    const btn = document.getElementById("confirmBasketBtn");
-    btn.disabled = false; btn.innerText = "✅ Confirm Full Order";
 }
 
 function confirmFullOrder() {
@@ -580,28 +599,43 @@ function confirmFullOrder() {
         });
 }
 
+// WhatsApp Basket Quote Builder with pre-GST values and "+ GST" label
 function shareFullOrder() {
     if (orderBasket.length === 0) return;
     const q0 = orderBasket[0];
     const lines = ["*K&S ENGINEERING WORKS*", "Resharpening & Recoating Quotation", "",
         "Customer : " + q0.customerName, "Date     : " + q0.date, ""];
 
-    let orderTotal = 0;
+    let orderTotalPreGst = 0;
+    let totalTransport = 0;
+    
     orderBasket.forEach((item, i) => {
+        const itemResh = parseFloat(item.resharpeningTotal) || 0;
+        const itemCoat = parseFloat(item.coatingTotal) || 0;
+        const itemPreGst = itemResh + itemCoat;
+
         lines.push("── Tool " + (i + 1) + ": " + item.toolCategory + " ──");
         if (item.drillAngle)   lines.push("  Drill Angle   : " + item.drillAngle);
         if (item.cornerRadius) lines.push("  Corner Radius : " + item.cornerRadius);
         lines.push("  Coating  : " + item.coating);
         lines.push("  Diameter : " + item.diameter + " mm  |  Qty: " + item.quantity);
         if (item.totalLength !== "N/A") lines.push("  Length   : " + item.totalLength + " mm");
-        lines.push("  Amount   : ₹" + item.grandTotal);
+        lines.push("  Amount   : ₹" + Math.round(itemPreGst));
         if (item.comments) lines.push("  Note     : " + item.comments);
         lines.push("");
-        orderTotal += parseFloat(item.grandTotal);
+
+        orderTotalPreGst += itemPreGst;
+        totalTransport += parseFloat(item.transportCost) || 0;
     });
 
+    const finalOrderTotalWithoutGst = orderTotalPreGst + totalTransport;
+
+    if (totalTransport > 0) {
+        lines.push("Total Transport (No GST): ₹" + Math.round(totalTransport));
+    }
+
     lines.push("=============================");
-    lines.push("*Total Order Amount : ₹" + Math.round(orderTotal) + "*");
+    lines.push("*Total Order Amount : ₹" + Math.round(finalOrderTotalWithoutGst) + " + GST*");
     lines.push("", "Thank you for choosing us!");
 
     const text = lines.join("\n");
