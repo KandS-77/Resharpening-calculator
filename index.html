@@ -28,7 +28,7 @@
         .reset-button:hover { background-color: #cbd5e0; }
         .share-button { background-color: #25D366; margin-top: 10px; display: none; }
         .share-button:hover { background-color: #1ebe57; }
-        .confirm-button { background-color: #38a169; margin-top: 12px; }
+        .confirm-button { background-color: #38a169; margin-top: 12px; display: none; }
         .confirm-button:hover { background-color: #2f855a; }
         .confirm-button:disabled { background-color: #9ae6b4; cursor: not-allowed; }
         .sheet-status { margin-top: 10px; padding: 10px; border-radius: 6px; font-size: 14px; display: none; }
@@ -66,11 +66,7 @@
     <div class="card">
         <h2>🎯 Which Coating Do I Need?</h2>
         <div class="form-group"><label>Customer Name</label><input type="text" id="customerName" placeholder="e.g. Patel Engineering"></div>
-        <!-- Changed: Added maxlength="10" and sliced value to 10 characters max -->
-        <div class="form-group">
-            <label>Contact Number</label>
-            <input type="tel" id="customerContact" inputmode="numeric" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="e.g. 9876543210">
-        </div>
+        <div class="form-group"><label>Contact Number</label><input type="tel" id="customerContact" inputmode="tel" placeholder="e.g. 9876543210"></div>
         <div class="form-group">
             <label>Workpiece Material / Application</label>
             <select id="workpieceMaterial" onchange="getRecommendation()">
@@ -101,6 +97,7 @@
                 <option value="ballnose">Ball Nose Cutter</option>
                 <option value="drill">Drill Bit</option>
                 <option value="chamfer">Chamfering Knife</option>
+                <option value="chamfernew">Chamfering Knife New (From Round Stock)</option>
             </select>
         </div>
         <div class="form-group"><label>Flutes</label><select id="flutes"></select></div>
@@ -154,7 +151,7 @@
             </select>
         </div>
         <div class="form-row">
-            <div class="form-group"><label>Diameter (mm) — Max 20mm *</label><input type="number" id="diameter" inputmode="decimal" placeholder="e.g. 12" step="any" min="3" max="20"></div>
+            <div class="form-group"><label>Diameter (mm) — Max 20mm</label><input type="number" id="diameter" inputmode="decimal" placeholder="e.g. 12" step="any" min="3" max="20"></div>
             <div class="form-group"><label>Quantity</label><input type="number" id="quantity" inputmode="numeric" placeholder="e.g. 1" step="1" min="1" value="1"></div>
         </div>
         <div class="form-group" id="lengthGroup" style="display:none;"><label>Total Length (mm)</label><input type="number" id="length" inputmode="decimal" placeholder="e.g. 75" step="any" min="1"></div>
@@ -176,7 +173,7 @@
             <div class="result-row muted-row"><span>Round Off:</span><span id="roundOff">₹0.00</span></div>
             <div class="result-row total-row" style="font-size:20px;color:#1a202c;"><span>Total Grand Bill:</span><span id="grandTotal">₹0.00</span></div>
         </div>
-        <button class="confirm-button" id="confirmBtn" style="display:none;" onclick="confirmOrder()">✅ Confirm Order</button>
+        <button class="confirm-button" id="confirmBtn" onclick="confirmOrder()">✅ Confirm Order</button>
         <div class="sheet-status" id="sheetStatus"></div>
     </div>
 
@@ -209,6 +206,8 @@ const CACHE_KEY_RESHARPENING = "kands_resharpening_price_cache";
 const CACHE_KEY_COATING      = "kands_coating_price_cache";
 const MAX_RESHARPEN_DIA      = 20;
 
+// Compact fallback coating data — 3 arrays instead of a big named object.
+// Matches prices.json exactly. GitHub can handle this size easily.
 const _FD = [3,4,6,8,10,12,14,16,18,20,22,26,30,32,35,40,50];
 const _FL = [50,75,100,150,200,300,400,500];
 const _FP = [
@@ -231,6 +230,7 @@ const _FP = [
     [691.15,1760.65,1902.1,3516.7,3691.5,4279.15,5557.95,15403.1]
 ];
 
+// Live price variables — initialised from compact defaults above
 let RESHARPENING_TABLE = {};
 let coatingLengths     = _FL.slice();
 let coatingDiameters   = _FD.slice();
@@ -246,7 +246,7 @@ const COATING_CLEAN_NAMES = {
 
 let lastQuoteData    = null;
 let pendingShareText = null;
-let orderBasket      = [];
+let orderBasket      = [];  // all tools added for the current customer
 
 async function loadPricesFromSheets() {
     const statusEl = document.getElementById("priceStatus");
@@ -272,6 +272,7 @@ async function loadPricesFromSheets() {
         return;
     } catch (err) { console.warn("prices.json fetch failed:", err.message); }
 
+    // Fetch failed — try device cache (defaults already loaded so calculator still works)
     const cachedResh = localStorage.getItem(CACHE_KEY_RESHARPENING);
     const cachedCoat = localStorage.getItem(CACHE_KEY_COATING);
     if (cachedResh && cachedCoat) {
@@ -306,6 +307,7 @@ function getRecommendation() {
     toggleLengthInput();
 }
 
+// Resharpening lookup: uses live table if loaded, otherwise compact bracket rules
 function getResharpeningPrice(category, flutes, dia) {
     const d = Math.ceil(dia);
     if (RESHARPENING_TABLE[category]) {
@@ -316,11 +318,13 @@ function getResharpeningPrice(category, flutes, dia) {
             return Number(m !== undefined ? fd[m] : fd[dias[dias.length - 1]]);
         }
     }
+    // Compact bracket fallback — no big table needed
     if (category === "flatendmill" || category === "radiusendmill")
         return flutes <= 3 ? (d<=6?50:d<=12?70:d<=16?100:160) : (d<=6?55:d<=12?75:d<=16?110:170);
     if (category === "ballnose") return d<=6?60:d<=12?80:d<=16?110:170;
-    if (category === "drill")    return d<=4?20:d<=8?30:d<=14?40:50;
+    if (category === "drill")    return flutes<=2?(d<=4?20:d<=8?30:d<=14?40:50):(d<=4?40:d<=8?50:d<=14?60:70);
     if (category === "chamfer")  return flutes===2?(d<=10?30:40):(d<=10?40:50);
+    if (category === "chamfernew") return flutes===2?(d<=8?80:d<=13?100:d<=18?150:180):(d<=8?100:d<=13?120:200);
     return 0;
 }
 
@@ -328,12 +332,14 @@ function updateFluteOptions() {
     const cat = document.getElementById("toolCategory").value;
     const sel = document.getElementById("flutes"); const prev = sel.value; sel.innerHTML = "";
     let opts = [2,3,4,5,6];
-    if (cat==="ballnose") opts=[2,4]; else if (cat==="drill") opts=[2]; else if (cat==="chamfer") opts=[2,3];
+    if (cat==="ballnose") opts=[2,3,4];
+    else if (cat==="drill") opts=[2,3];
+    else if (cat==="chamfer" || cat==="chamfernew") opts=[2,3];
     opts.forEach(f => { const o=document.createElement("option"); o.value=f; o.innerText=f+" Flutes"; sel.appendChild(o); });
     if (opts.includes(parseInt(prev))) sel.value = prev;
 
-    document.getElementById("drillAngleGroup").style.display   = cat === "drill"        ? "block" : "none";
-    document.getElementById("cornerRadiusGroup").style.display = cat === "radiusendmill" ? "block" : "none";
+    document.getElementById("drillAngleGroup").style.display   = cat === "drill"         ? "block" : "none";
+    document.getElementById("cornerRadiusGroup").style.display = cat === "radiusendmill"  ? "block" : "none";
 }
 
 function toggleLengthInput() {
@@ -341,8 +347,6 @@ function toggleLengthInput() {
 }
 
 function calculateQuote() {
-    const customerName = document.getElementById("customerName").value.trim() || "(No name)";
-
     const cat=document.getElementById("toolCategory").value, flutes=parseInt(document.getElementById("flutes").value||2);
     const material=document.getElementById("material").value, coating=document.getElementById("coatingType").value;
     const inputDia=parseFloat(document.getElementById("diameter").value);
@@ -352,12 +356,13 @@ function calculateQuote() {
 
     lw.style.display="none";
     document.getElementById("confirmBtn").style.display="none";
+    document.getElementById("confirmBtn").style.display="none";
     document.getElementById("addBasketBtn").style.display="none";
     document.getElementById("shareBtn").style.display="none";
     lastQuoteData=null;
 
-    if (isNaN(inputDia)) { alert("Please enter a valid tool diameter."); return; }
-    if (coating!=="NONE"&&isNaN(inputLen)) { alert("Please enter the tool length for coating calculations."); return; }
+    if (isNaN(inputDia)) { alert("Please enter a valid diameter."); return; }
+    if (coating!=="NONE"&&isNaN(inputLen)) { alert("Please enter the tool length for coating."); return; }
     if (isNaN(inputQty)||inputQty<1) { alert("Please enter a valid quantity (minimum 1)."); return; }
     if (inputDia>MAX_RESHARPEN_DIA) {
         lw.innerText="⚠ Diameter exceeds machine capacity (max "+MAX_RESHARPEN_DIA+"mm).";
@@ -387,11 +392,8 @@ function calculateQuote() {
     const totalResh=resharpeningUnit*inputQty, totalCoat=modifiedCoatingUnit*inputQty;
     const transport=parseFloat(document.getElementById("transport").value)||0;
     const subtotal=totalResh+totalCoat, gst=subtotal*0.18;
-    const grandRaw=subtotal+gst+transport;
-    const grandRounded=Math.round(grandRaw);
-    
-    const roundOff = (grandRounded - grandRaw).toFixed(2);
-    const parsedRoundOff = parseFloat(roundOff);
+    const grandRaw=subtotal+gst+transport, grandRounded=Math.round(grandRaw);
+    const roundOff=grandRounded-grandRaw;
 
     document.getElementById("qtyDisplay").innerText=""+inputQty;
     document.getElementById("resCost").innerText="₹"+totalResh.toFixed(2);
@@ -400,13 +402,13 @@ function calculateQuote() {
     document.getElementById("subtotal").innerText="₹"+subtotal.toFixed(2);
     document.getElementById("gst").innerText="₹"+gst.toFixed(2);
     document.getElementById("transportDisplay").innerText="₹"+transport.toFixed(2);
-    document.getElementById("roundOff").innerText=(parsedRoundOff>=0?"+₹":"-₹")+Math.abs(parsedRoundOff).toFixed(2);
+    document.getElementById("roundOff").innerText=(roundOff>=0?"+₹":"-₹")+Math.abs(roundOff).toFixed(2);
     document.getElementById("grandTotal").innerText="₹"+grandRounded.toFixed(2);
     document.getElementById("results").style.display="block";
 
     const now=new Date();
     lastQuoteData={
-        customerName: customerName,
+        customerName: document.getElementById("customerName").value.trim()||"(No name)",
         customerContact: document.getElementById("customerContact").value.trim()||"(No contact)",
         date: now.toLocaleDateString("en-IN"), time: now.toLocaleTimeString("en-IN"),
         toolCategory: document.getElementById("toolCategory").options[document.getElementById("toolCategory").selectedIndex].text,
@@ -496,6 +498,7 @@ function addToBasket() {
     orderBasket.push(Object.assign({}, lastQuoteData));
     renderBasket();
 
+    // Clear only tool fields — keep customer name and contact for next tool
     ["diameter","length","transport","drillAngle","cornerRadius","comments"].forEach(id => document.getElementById(id).value = "");
     document.getElementById("quantity").value = "1";
     document.getElementById("toolCategory").value = "flatendmill"; updateFluteOptions();
