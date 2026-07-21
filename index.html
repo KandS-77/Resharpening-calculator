@@ -3,655 +3,1062 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tool Pricing & Recommendation Calculator — K&S Engineering Works</title>
+    <title>K&S Engineering Works – Resharpening & Recoating Calculator</title>
+    <!-- Tailwind Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- React & Babel CDNs -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f4f6f9; margin: 0; padding: 15px; color: #333; }
-        .container { max-width: 500px; margin: auto; display: flex; flex-direction: column; gap: 20px; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        h2 { margin-top: 0; color: #1a365d; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; font-size: 20px; display: flex; align-items: center; gap: 8px;}
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; font-size: 16px; background-color: #fff; }
-        textarea { resize: vertical; font-family: inherit; }
-        button { width: 100%; background-color: #3182ce; color: white; border: none; padding: 12px; font-size: 18px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 5px; }
-        button:hover { background-color: #2b6cb0; }
-        .rec-box { background-color: #f0fff4; border-left: 4px solid #38a169; padding: 12px; border-radius: 6px; margin-top: 10px; font-size: 14px; display: none; }
-        .rec-title { font-weight: bold; color: #276749; margin-bottom: 4px; font-size: 15px;}
-        .result-box { background-color: #ebf8ff; border-left: 4px solid #3182ce; padding: 15px; border-radius: 4px; margin-top: 20px; display: none; }
-        .result-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 15px; }
-        .total-row { font-weight: bold; font-size: 18px; border-top: 1px dashed #cbd5e0; padding-top: 8px; margin-top: 8px; color: #2c5282; }
-        .muted-row { color: #718096; font-size: 13px; }
-        .limit-warning { background-color: #fff5f5; border-left: 4px solid #e53e3e; color: #9b2c2c; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 14px; display: none; }
-        .form-row { display: flex; gap: 10px; }
-        .form-row .form-group { flex: 1; margin-bottom: 15px; }
-        .reset-button { background-color: #e2e8f0; color: #2d3748; margin-top: 10px; }
-        .reset-button:hover { background-color: #cbd5e0; }
-        .share-button { background-color: #25D366; margin-top: 10px; display: none; }
-        .share-button:hover { background-color: #1ebe57; }
-        .confirm-button { background-color: #38a169; margin-top: 12px; display: none; }
-        .confirm-button:hover { background-color: #2f855a; }
-        .confirm-button:disabled { background-color: #9ae6b4; cursor: not-allowed; }
-        .sheet-status { margin-top: 10px; padding: 10px; border-radius: 6px; font-size: 14px; display: none; }
-        .sheet-status.sending { background-color: #ebf8ff; color: #2c5282; border-left: 4px solid #3182ce; }
-        .sheet-status.success { background-color: #f0fff4; color: #276749; border-left: 4px solid #38a169; }
-        .sheet-status.error { background-color: #fff5f5; color: #9b2c2c; border-left: 4px solid #e53e3e; }
-        .share-modal-backdrop { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: flex-end; justify-content: center; }
-        .share-modal-backdrop.visible { display: flex; }
-        .share-modal-box { background: white; width: 100%; max-width: 500px; border-radius: 16px 16px 0 0; padding: 20px; box-sizing: border-box; animation: slideUp 0.2s ease-out; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .share-modal-box h3 { margin: 0 0 15px 0; color: #1a365d; text-align: center; }
-        .share-option-btn { width: 100%; text-align: left; padding: 14px 16px; margin-bottom: 8px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f7fafc; color: #2d3748; font-size: 16px; font-weight: normal; }
-        .share-option-btn:hover { background: #edf2f7; }
-        .price-status { padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; }
-        .price-status.loading { background-color: #ebf8ff; color: #2c5282; border-left: 4px solid #3182ce; }
-        .price-status.success { background-color: #f0fff4; color: #276749; border-left: 4px solid #38a169; }
-        .price-status.warning { background-color: #fffaf0; color: #9c4221; border-left: 4px solid #dd6b20; }
-        .refresh-button { background-color: #edf2f7; color: #2d3748; font-size: 14px; padding: 8px; margin-top: 0; margin-bottom: 15px; }
-        .refresh-button:hover { background-color: #e2e8f0; }
-        .add-basket-btn { background-color: #805ad5; margin-top:10px; display:none; }
-        .add-basket-btn:hover { background-color: #6b46c1; }
-        .basket-item { display:flex; justify-content:space-between; align-items:center; padding:10px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:8px; font-size:14px; }
-        .basket-item-info { flex:1; }
-        .basket-item-info strong { display:block; font-size:15px; color:#1a365d; }
-        .basket-item-info span { color:#718096; font-size:13px; }
-        .basket-item-price { font-weight:bold; color:#2c5282; margin:0 12px; white-space:nowrap; }
-        .basket-remove { background:#e53e3e; color:white; border:none; border-radius:6px; padding:6px 10px; cursor:pointer; font-size:13px; font-weight:bold; }
-        .basket-remove:hover { background:#c53030; }
-        .basket-summary { background:#f7fafc; border-radius:8px; padding:12px; margin-top:8px; margin-bottom:12px; }
-        .basket-summary .total-line { display:flex; justify-content:space-between; font-size:16px; font-weight:bold; color:#1a202c; margin-top:6px; padding-top:6px; border-top:2px solid #e2e8f0; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f4f6f9;
+        }
     </style>
 </head>
-<body>
-<div class="container">
-    <!-- Card 1: recommendation -->
-    <div class="card">
-        <h2>🎯 Which Coating Do I Need?</h2>
-        <div class="form-group"><label>Customer Name</label><input type="text" id="customerName" placeholder="e.g. Patel Engineering"></div>
-        <div class="form-group"><label>Contact Number</label><input type="tel" id="customerContact" inputmode="tel" placeholder="e.g. 9876543210"></div>
-        <div class="form-group">
-            <label>Workpiece Material / Application</label>
-            <select id="workpieceMaterial" onchange="getRecommendation()">
-                <option value="">-- Tap to choose workpiece requirement --</option>
-                <option value="hardened_high">Hardened Steel / High-Temp Alloys (Up to 70 HRC)</option>
-                <option value="stainless">Stainless Steel / Tough Steels</option>
-                <option value="aluminium">Aluminium & Alloys (&lt;12% Si) / Copper / Brass</option>
-                <option value="drilling_steel">General Drilling / Deep-Hole Steel Drilling</option>
-                <option value="universal">General Purpose / Allrounder (Milling & Turning)</option>
-                <option value="hardened_drills_reamers">Hardened Steel – Stick Blades / Drills / Reamers (45–72 HRC)</option>
-            </select>
-        </div>
-        <div class="rec-box" id="recDisplay">
-            <div class="rec-title" id="recTargetCoating">Recommended Choice: -</div>
-            <div id="recDescription">-</div>
-        </div>
-    </div>
+<body class="p-4 md:p-6 text-gray-800">
 
-    <!-- Card 2: input specifications and calculation -->
-    <div class="card">
-        <h2>📐 Quote & Dimension Settings</h2>
-        <div class="price-status" id="priceStatus" style="display:none;"></div>
-        <button class="refresh-button" onclick="loadPricesFromSheets()">🔄 Refresh Prices</button>
-        <div class="form-group">
-            <label>Tool Category</label>
-            <select id="toolCategory" onchange="updateFluteOptions()">
-                <option value="flatendmill">Flat Endmill</option>
-                <option value="radiusendmill">Radius Endmill</option>
-                <option value="ballnose">Ball Nose Cutter</option>
-                <option value="drill">Drill Bit</option>
-                <option value="chamfer">Chamfering Knife</option>
-                <option value="chamfernew">Chamfering Knife New (From Round Stock)</option>
-            </select>
-        </div>
-        <div class="form-group"><label>Flutes</label><select id="flutes"></select></div>
+    <div id="root"></div>
 
-        <div class="form-group" id="drillAngleGroup" style="display:none;">
-            <label>Drill Point Angle</label>
-            <input type="text" id="drillAngle" list="drillAngleList" placeholder="e.g. 118° or type custom angle">
-            <datalist id="drillAngleList">
-                <option value="118°">118° — General Purpose</option>
-                <option value="135°">135° — Self-Centering / Hard Materials</option>
-                <option value="140°">140°</option>
-                <option value="150°">150°</option>
-                <option value="90°">90° — Countersink</option>
-            </datalist>
-        </div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
 
-        <div class="form-group" id="cornerRadiusGroup" style="display:none;">
-            <label>Corner Radius (mm)</label>
-            <input type="text" id="cornerRadius" list="cornerRadiusList" placeholder="e.g. R0.5 or type custom radius">
-            <datalist id="cornerRadiusList">
-                <option value="R0.2"></option>
-                <option value="R0.3"></option>
-                <option value="R0.5"></option>
-                <option value="R1.0"></option>
-                <option value="R1.5"></option>
-                <option value="R2.0"></option>
-                <option value="R2.5"></option>
-                <option value="R3.0"></option>
-                <option value="R4.0"></option>
-                <option value="R5.0"></option>
-            </datalist>
-        </div>
-        <div class="form-group">
-            <label>Tool Substrate Material</label>
-            <select id="material">
-                <option value="carbide">Solid Carbide Tool</option>
-                <option value="hss">HSS (20% Coating Discount applied)</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Coating Layer Selection</label>
-            <select id="coatingType" onchange="toggleLengthInput()">
-                <option value="NONE">No Coating (Resharpening Only)</option>
-                <option value="ALCRONA_PRO">BALINIT ALCRONA PRO (Base Rate)</option>
-                <option value="ALCRONA_EVO">BALINIT ALCRONA EVO (Base Rate)</option>
-                <option value="HARD_CARBON">BALINIT HARD CARBON (1.3x Rate)</option>
-                <option value="MAYURA">BALINIT MAYURA (1.3x Rate)</option>
-                <option value="DURANA">BALINIT DURANA (1.3x Rate)</option>
-                <option value="OPTURA">BALINIT OPTURA (1.3x Rate)</option>
-                <option value="TISINOS_PRO">BALIQ TISINOS PRO (1.85x Rate)</option>
-            </select>
-        </div>
-        <div class="form-row">
-            <div class="form-group"><label>Diameter (mm) — Max 20mm</label><input type="number" id="diameter" inputmode="decimal" placeholder="e.g. 12" step="any" min="3" max="20"></div>
-            <div class="form-group"><label>Quantity</label><input type="number" id="quantity" inputmode="numeric" placeholder="e.g. 1" step="1" min="1" value="1"></div>
-        </div>
-        <div class="form-group" id="lengthGroup" style="display:none;"><label>Total Length (mm)</label><input type="number" id="length" inputmode="decimal" placeholder="e.g. 75" step="any" min="1"></div>
-        <div class="form-group"><label>Transportation Charges</label><input type="number" id="transport" inputmode="decimal" placeholder="e.g. 100 (leave blank if none)" step="any" min="0"></div>
-        <div class="form-group"><label>Comments / Special Instructions</label><textarea id="comments" rows="3" placeholder="e.g. chipped edge on flute 2, urgent delivery, special geometry needed..."></textarea></div>
-        <div class="limit-warning" id="limitWarning"></div>
-        
-        <button onclick="calculateQuote()">Calculate Invoice Price</button>
-        <button class="reset-button" onclick="resetForm()">↺ Reset / New Quote</button>
-        <button class="share-button" id="shareBtn" onclick="shareQuote()" style="display:none;">📤 Share This Tool Only</button>
-        <button class="add-basket-btn" id="addBasketBtn" onclick="addToBasket()" style="display:none;">➕ Add to Order Basket</button>
-        
-        <div class="result-box" id="results">
-            <div class="result-row muted-row"><span>Quantity:</span><span id="qtyDisplay">1</span></div>
-            <div class="result-row"><span>Resharpening (Total):</span><span id="resCost">₹0.00</span></div>
-            <div class="result-row" id="coatBaseRow"><span>Coating Grid Price (Per Tool):</span><span id="coatBase">₹0.00</span></div>
-            <div class="result-row" id="coatFinalRow"><span>Coating Fee (Total):</span><span id="coatFinal">₹0.00</span></div>
-            <div class="result-row total-row"><span>Subtotal Amount:</span><span id="subtotal">₹0.00</span></div>
-            <div class="result-row"><span>GST (18%):</span><span id="gst">₹0.00</span></div>
-            <div class="result-row muted-row"><span>Transportation (No GST):</span><span id="transportDisplay">₹0.00</span></div>
-            <div class="result-row muted-row"><span>Round Off:</span><span id="roundOff">₹0.00</span></div>
-            <div class="result-row total-row" style="font-size:20px;color:#1a202c;"><span>Total Grand Bill:</span><span id="grandTotal">₹0.00</span></div>
-        </div>
-        
-        <button class="confirm-button" id="confirmBtn" onclick="confirmOrder()">✅ Confirm Order</button>
-        <div class="sheet-status" id="sheetStatus"></div>
-    </div>
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxo7k0nB_IrqI1cjYY9fhoqlB6f2GIUnKCwZBZ8iQNLfBSbl6oi-Dhw_DM1ZJ6Xio_Avw/exec";
+        const PRICES_JSON_URL = "prices.json";
+        const CACHE_KEY_RESHARPENING = "kands_resharpening_price_cache";
+        const CACHE_KEY_COATING = "kands_coating_price_cache";
+        const MAX_RESHARPEN_DIA = 20;
 
-    <!-- ORDER BASKET -->
-    <div class="card" id="basketCard" style="display:none;">
-        <h2>🛒 Order Basket</h2>
-        <div id="basketItems"></div>
-        <div class="basket-summary" id="basketSummary"></div>
-        <button class="confirm-button" id="confirmBasketBtn" onclick="confirmFullOrder()" style="display:block;">✅ Confirm Full Order</button>
-        <button class="share-button" style="display:block;margin-top:10px;" onclick="shareFullOrder()">📤 Share Full Quote</button>
-        <button class="reset-button" style="margin-top:10px;" onclick="clearBasket()">🗑 Clear Basket</button>
-        <div class="sheet-status" id="basketStatus"></div>
-    </div>
-</div>
+        // Fallback pricing configuration
+        const FALLBACK_FD = [3,4,6,8,10,12,14,16,18,20,22,26,30,32,35,40,50];
+        const FALLBACK_FL = [50,75,100,150,200,300,400,500];
+        const FALLBACK_FP = [
+            [81.65,82.8,125.35,166.75,409.4,738.3,863.65,923.45],
+            [81.65,82.8,125.35,166.75,409.4,738.3,923.45,1038.45],
+            [95.45,98.9,148.35,197.8,409.4,738.3,923.45,1360.45],
+            [118.45,127.65,182.85,243.8,409.4,738.3,923.45,1534.1],
+            [154.1,158.7,236.9,316.25,409.4,738.3,923.45,1677.85],
+            [185.15,189.75,285.2,379.5,409.4,738.3,923.45,1791.7],
+            [231.15,236.9,355.35,474.95,512.9,923.45,1154.6,1948.1],
+            [231.15,236.9,355.35,474.95,512.9,923.45,1154.6,2179.25],
+            [308.2,316.25,474.95,632.5,821.1,1476.6,1845.75,2381.65],
+            [308.2,316.25,474.95,632.5,821.1,1476.6,1845.75,2705.95],
+            [385.25,395.6,593.4,791.2,1024.65,1845.75,2306.9,3073.95],
+            [512.9,526.7,791.2,1024.65,1054.55,1845.75,2306.9,3540.85],
+            [512.9,791.2,1185.65,1581.25,2032.05,3008.4,4395.3,5537.25],
+            [512.9,791.2,1185.65,1581.25,2051.6,3215.4,4614.95,5810.95],
+            [593.4,826.85,1627.25,1670.95,2051.6,3423.55,4910.5,7226.6],
+            [641.7,1200.6,1787.1,2121.75,2404.65,3691.5,5169.25,9022.9],
+            [691.15,1760.65,1902.1,3516.7,3691.5,4279.15,5557.95,15403.1]
+        ];
 
-<!-- Modal Dialog for sharing options -->
-<div class="share-modal-backdrop" id="shareModalBackdrop" onclick="closeShareModal()">
-    <div class="share-modal-box" onclick="event.stopPropagation()">
-        <h3>Share Quote Via</h3>
-        <button class="share-option-btn" onclick="shareViaSMS()">💬 SMS / Messages</button>
-        <button class="share-option-btn" onclick="shareViaEmail()">📧 Email</button>
-        <button class="share-option-btn" onclick="shareViaCopy()">📋 Copy Text</button>
-        <button class="share-option-btn cancel-btn" onclick="closeShareModal()">Cancel</button>
-    </div>
-</div>
+        const COATING_CLEAN_NAMES = {
+            NONE: "No Coating (Resharpening Only)",
+            ALCRONA_PRO: "BALINIT ALCRONA PRO",
+            ALCRONA_EVO: "BALINIT ALCRONA EVO",
+            HARD_CARBON: "BALINIT HARD CARBON",
+            MAYURA: "BALINIT MAYURA",
+            DURANA: "BALINIT DURANA",
+            OPTURA: "BALINIT OPTURA",
+            TISINOS_PRO: "BALIQ TISINOS PRO"
+        };
 
-<script>
-const GOOGLE_SCRIPT_URL      = "https://script.google.com/macros/s/AKfycbxo7k0nB_IrqI1cjYY9fhoqlB6f2GIUnKCwZBZ8iQNLfBSbl6oi-Dhw_DM1ZJ6Xio_Avw/exec";
-const PRICES_JSON_URL        = "./prices.json";
-const CACHE_KEY_RESHARPENING = "kands_resharpening_price_cache";
-const CACHE_KEY_COATING      = "kands_coating_price_cache";
-const MAX_RESHARPEN_DIA      = 20;
+        const RECOMMENDATION_MAP = {
+            hardened_high:          ["⭐ BALIQ TISINOS PRO",    "Best for hard machining up to 70 HRC and high-temp alloys.",                          "TISINOS_PRO"],
+            stainless:              ["⭐ BALIQ TISINOS PRO",    "Ideal for stainless steel. For general milling, ALCRONA EVO is a solid alternative.", "TISINOS_PRO"],
+            aluminium:              ["⭐ BALINIT MAYURA (ta-C)","Smooth carbon prevents adhesion on Aluminium (<12% Si), Copper, Brass, Polymers.",    "MAYURA"],
+            drilling_steel:         ["⭐ BALINIT OPTURA",       "Engineered for steel/cast iron drilling. Multilayer design optimizes wear.",            "OPTURA"],
+            universal:              ["⭐ BALINIT ALCRONA EVO",  "3rd-generation allrounder — >30% better performance than ALCRONA PRO.",               "ALCRONA_EVO"],
+            hardened_drills_reamers: ["⭐ BALINIT DURANA",       "For stick blades, drills and reamers in hardened steel 45–72 HRC.",                    "DURANA"]
+        };
 
-// Compact fallback coating data
-const _FD = [3,4,6,8,10,12,14,16,18,20,22,26,30,32,35,40,50];
-const _FL = [50,75,100,150,200,300,400,500];
-const _FP = [
-    [81.65,82.8,125.35,166.75,409.4,738.3,863.65,923.45],
-    [81.65,82.8,125.35,166.75,409.4,738.3,923.45,1038.45],
-    [95.45,98.9,148.35,197.8,409.4,738.3,923.45,1360.45],
-    [118.45,127.65,182.85,243.8,409.4,738.3,923.45,1534.1],
-    [154.1,158.7,236.9,316.25,409.4,738.3,923.45,1677.85],
-    [185.15,189.75,285.2,379.5,409.4,738.3,923.45,1791.7],
-    [231.15,236.9,355.35,474.95,512.9,923.45,1154.6,1948.1],
-    [231.15,236.9,355.35,474.95,512.9,923.45,1154.6,2179.25],
-    [308.2,316.25,474.95,632.5,821.1,1476.6,1845.75,2381.65],
-    [308.2,316.25,474.95,632.5,821.1,1476.6,1845.75,2705.95],
-    [385.25,395.6,593.4,791.2,1024.65,1845.75,2306.9,3073.95],
-    [512.9,526.7,791.2,1024.65,1054.55,1845.75,2306.9,3540.85],
-    [512.9,791.2,1185.65,1581.25,2032.05,3008.4,4395.3,5537.25],
-    [512.9,791.2,1185.65,1581.25,2051.6,3215.4,4614.95,5810.95],
-    [593.4,826.85,1627.25,1670.95,2051.6,3423.55,4910.5,7226.6],
-    [641.7,1200.6,1787.1,2121.75,2404.65,3691.5,5169.25,9022.9],
-    [691.15,1760.65,1902.1,3516.7,3691.5,4279.15,5557.95,15403.1]
-];
+        function App() {
+            // Price State Variables
+            const [resharpeningTable, setResharpeningTable] = useState({});
+            const [coatingLengths, setCoatingLengths] = useState(FALLBACK_FL);
+            const [coatingDiameters, setCoatingDiameters] = useState(FALLBACK_FD);
+            const [coatingBasePrices, setCoatingBasePrices] = useState(() => {
+                const init = {};
+                FALLBACK_FD.forEach((d, i) => { init[d] = FALLBACK_FP[i]; });
+                return init;
+            });
 
-let RESHARPENING_TABLE = {};
-let coatingLengths     = _FL.slice();
-let coatingDiameters   = _FD.slice();
-let coatingBasePrices  = {};
-_FD.forEach((d, i) => { coatingBasePrices[d] = _FP[i]; });
+            const [priceStatus, setPriceStatus] = useState({ text: "", type: "", show: false });
 
-const COATING_CLEAN_NAMES = {
-    NONE:"No Coating (Resharpening Only)", ALCRONA_PRO:"BALINIT ALCRONA PRO",
-    ALCRONA_EVO:"BALINIT ALCRONA EVO",     HARD_CARBON:"BALINIT HARD CARBON",
-    MAYURA:"BALINIT MAYURA",               DURANA:"BALINIT DURANA",
-    OPTURA:"BALINIT OPTURA",               TISINOS_PRO:"BALIQ TISINOS PRO"
-};
+            // Form inputs
+            const [customerName, setCustomerName] = useState("");
+            const [customerContact, setCustomerContact] = useState("");
+            const [workpieceMaterial, setWorkpieceMaterial] = useState("");
+            const [recTitle, setRecTitle] = useState("");
+            const [recDesc, setRecDesc] = useState("");
+            const [showRec, setShowRec] = useState(false);
 
-let lastQuoteData    = null;
-let pendingShareText = null;
-let orderBasket      = [];
+            const [toolCategory, setToolCategory] = useState("flatendmill");
+            const [flutes, setFlutes] = useState(2);
+            const [drillAngle, setDrillAngle] = useState("");
+            const [cornerRadius, setCornerRadius] = useState("");
+            const [substrateMaterial, setSubstrateMaterial] = useState("carbide");
+            const [coatingType, setCoatingType] = useState("NONE");
+            const [diameter, setDiameter] = useState("");
+            const [quantity, setQuantity] = useState(1);
+            const [totalLength, setTotalLength] = useState("");
+            const [transportCharges, setTransportCharges] = useState("");
+            const [comments, setComments] = useState("");
 
-async function loadPricesFromSheets() {
-    const statusEl = document.getElementById("priceStatus");
-    statusEl.className = "price-status loading";
-    statusEl.innerText = "🔄 Loading latest prices...";
-    statusEl.style.display = "block";
-    try {
-        const res = await fetch(PRICES_JSON_URL + "?v=" + Date.now());
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const data = await res.json();
-        if (data.resharpening) {
-            RESHARPENING_TABLE = data.resharpening;
-            localStorage.setItem(CACHE_KEY_RESHARPENING, JSON.stringify({ table: RESHARPENING_TABLE, savedAt: Date.now() }));
+            const [warning, setWarning] = useState(null);
+
+            // Quote Results
+            const [calculatedQuote, setCalculatedQuote] = useState(null);
+            const [orderBasket, setOrderBasket] = useState([]);
+
+            // Share Modal Controls
+            const [pendingShareText, setPendingShareText] = useState("");
+            const [showShareModal, setShowShareModal] = useState(false);
+            const [singleShareBtnText, setSingleShareBtnText] = useState("📤 Share This Tool Only");
+            const [basketShareBtnText, setBasketShareBtnText] = useState("📤 Share Full Quote");
+
+            // Google Sheets Status
+            const [singleStatusText, setSingleStatusText] = useState("");
+            const [singleStatusClass, setSingleStatusClass] = useState("");
+            const [singleStatusShow, setSingleStatusShow] = useState(false);
+            const [confirmSingleDisabled, setConfirmSingleDisabled] = useState(false);
+            const [confirmSingleText, setConfirmSingleText] = useState("✅ Confirm Order");
+
+            const [basketStatusText, setBasketStatusText] = useState("");
+            const [basketStatusClass, setBasketStatusClass] = useState("");
+            const [basketStatusShow, setBasketStatusShow] = useState(false);
+            const [confirmBasketDisabled, setConfirmBasketDisabled] = useState(false);
+            const [confirmBasketText, setConfirmBasketText] = useState("✅ Confirm Full Order");
+
+            // Sync database
+            useEffect(() => {
+                loadPricesFromSheets();
+            }, []);
+
+            const loadPricesFromSheets = async () => {
+                setPriceStatus({
+                    text: "🔄 Loading latest prices...",
+                    type: "loading",
+                    show: true
+                });
+                try {
+                    const res = await fetch(PRICES_JSON_URL + "?v=" + Date.now());
+                    if (!res.ok) throw new Error("HTTP " + res.status);
+                    const data = await res.json();
+                    if (data.resharpening) {
+                        setResharpeningTable(data.resharpening);
+                        localStorage.setItem(CACHE_KEY_RESHARPENING, JSON.stringify({ table: data.resharpening, savedAt: Date.now() }));
+                    }
+                    if (data.coating) {
+                        setCoatingLengths(data.coating.lengths);
+                        setCoatingBasePrices(data.coating.prices);
+                        const sortedFD = Object.keys(data.coating.prices).map(Number).sort((a, b) => a - b);
+                        setCoatingDiameters(sortedFD);
+                        localStorage.setItem(CACHE_KEY_COATING, JSON.stringify({ diameters: sortedFD, lengths: data.coating.lengths, prices: data.coating.prices, savedAt: Date.now() }));
+                    }
+                    setPriceStatus({
+                        text: "✅ Prices loaded (last updated: " + (data.lastUpdated || "recently") + ")",
+                        type: "success",
+                        show: true
+                    });
+                } catch (err) {
+                    console.warn("prices.json fetch failed:", err.message);
+                    const cachedResh = localStorage.getItem(CACHE_KEY_RESHARPENING);
+                    const cachedCoat = localStorage.getItem(CACHE_KEY_COATING);
+                    if (cachedResh && cachedCoat) {
+                        const resh = JSON.parse(cachedResh).table;
+                        const p = JSON.parse(cachedCoat);
+                        setResharpeningTable(resh);
+                        setCoatingDiameters(p.diameters);
+                        setCoatingLengths(p.lengths);
+                        setCoatingBasePrices(p.prices);
+                        setPriceStatus({
+                            text: "⚠ Using last saved prices (" + new Date(JSON.parse(cachedCoat).savedAt).toLocaleString("en-IN") + ").",
+                            type: "warning",
+                            show: true
+                        });
+                    } else {
+                        setPriceStatus({
+                            text: "⚠ Cannot reach prices.json. Using built-in offline prices.",
+                            type: "warning",
+                            show: true
+                        });
+                    }
+                }
+            };
+
+            const getRecommendation = (val) => {
+                setWorkpieceMaterial(val);
+                if (!val) {
+                    setShowRec(false);
+                    return;
+                }
+                const rec = RECOMMENDATION_MAP[val];
+                if (rec) {
+                    setRecTitle(rec[0]);
+                    setRecDesc(rec[1]);
+                    setCoatingType(rec[2]);
+                    setShowRec(true);
+                }
+            };
+
+            const getResharpeningPrice = (category, flutesCount, dia) => {
+                const d = Math.ceil(dia);
+                if (resharpeningTable[category]) {
+                    const fd = resharpeningTable[category][flutesCount] || resharpeningTable[category][String(flutesCount)];
+                    if (fd) {
+                        const dias = Object.keys(fd).map(Number).sort((a, b) => a - b);
+                        const m = dias.find(d2 => d2 >= d);
+                        return Number(m !== undefined ? fd[m] : fd[dias[dias.length - 1]]);
+                    }
+                }
+                // Backup offline formula fallback
+                if (category === "flatendmill" || category === "radiusendmill")
+                    return flutesCount <= 3 ? (d<=6?50:d<=12?70:d<=16?100:160) : (d<=6?55:d<=12?75:d<=16?110:170);
+                if (category === "ballnose") return d<=6?60:d<=12?80:d<=16?110:170;
+                if (category === "drill")    return flutesCount<=2?(d<=4?20:d<=8?30:d<=14?40:50):(d<=4?40:d<=8?50:d<=14?60:70);
+                if (category === "chamfer")  return flutesCount===2?(d<=10?30:40):(d<=10?40:50);
+                if (category === "chamfernew") return flutesCount===2?(d<=8?80:d<=13?100:d<=18?150:180):(d<=8?100:d<=13?120:200);
+                return 0;
+            };
+
+            const getFluteOptions = (cat) => {
+                if (cat === "ballnose") return [2, 3, 4];
+                if (cat === "drill" || cat === "chamfer" || cat === "chamfernew") return [2, 3];
+                return [2, 3, 4, 5, 6];
+            };
+
+            useEffect(() => {
+                const opts = getFluteOptions(toolCategory);
+                if (!opts.includes(flutes)) {
+                    setFlutes(opts[0]);
+                }
+            }, [toolCategory]);
+
+            const calculateQuote = () => {
+                setWarning(null);
+                setSingleStatusShow(false);
+                setCalculatedQuote(null);
+                setConfirmSingleText("✅ Confirm Order");
+                setConfirmSingleDisabled(false);
+
+                const parsedDia = parseFloat(diameter);
+                const parsedQty = parseInt(String(quantity));
+                const parsedLen = parseFloat(totalLength);
+                const transportVal = parseFloat(transportCharges) || 0;
+
+                if (isNaN(parsedDia)) {
+                    alert("Please enter a valid diameter.");
+                    return;
+                }
+                if (coatingType !== "NONE" && isNaN(parsedLen)) {
+                    alert("Please enter the tool length for coating.");
+                    return;
+                }
+                if (isNaN(parsedQty) || parsedQty < 1) {
+                    alert("Please enter a valid quantity (minimum 1).");
+                    return;
+                }
+                if (parsedDia > MAX_RESHARPEN_DIA) {
+                    setWarning("⚠ Diameter exceeds machine capacity (max " + MAX_RESHARPEN_DIA + "mm).");
+                    return;
+                }
+
+                const resharpeningUnit = getResharpeningPrice(toolCategory, flutes, parsedDia);
+                let baseCoatingCost = 0;
+                let modifiedCoatingUnit = 0;
+
+                if (coatingType !== "NONE") {
+                    const diaSlab = coatingDiameters.find(d => d >= parsedDia) || coatingDiameters[coatingDiameters.length - 1];
+                    const lenSlab = coatingLengths.find(l => l >= parsedLen) || coatingLengths[coatingLengths.length - 1];
+                    const lenIdx = coatingLengths.indexOf(lenSlab);
+                    const priceRow = coatingBasePrices[diaSlab] || coatingBasePrices[String(diaSlab)];
+                    baseCoatingCost = priceRow ? priceRow[lenIdx] : 0;
+                    let multiplier = 1.0;
+                    if (["HARD_CARBON", "MAYURA", "DURANA", "OPTURA"].includes(coatingType)) {
+                        multiplier = 1.30;
+                    } else if (coatingType === "TISINOS_PRO") {
+                        multiplier = 1.85;
+                    }
+                    modifiedCoatingUnit = baseCoatingCost * multiplier * (substrateMaterial === "hss" ? 0.80 : 1.0);
+                }
+
+                const totalResh = resharpeningUnit * parsedQty;
+                const totalCoat = modifiedCoatingUnit * parsedQty;
+                const subtotal = totalResh + totalCoat;
+                const gst = subtotal * 0.18;
+                const grandRaw = subtotal + gst + transportVal;
+                const grandRounded = Math.round(grandRaw);
+
+                const categoryLabels = {
+                    flatendmill: "Flat Endmill",
+                    radiusendmill: "Radius Endmill",
+                    ballnose: "Ball Nose Cutter",
+                    drill: "Drill Bit",
+                    chamfer: "Chamfering Knife",
+                    chamfernew: "Chamfering Knife New"
+                };
+
+                const now = new Date();
+                const result = {
+                    customerName: customerName.trim() || "(No name)",
+                    customerContact: customerContact.trim() || "(No contact)",
+                    date: now.toLocaleDateString("en-IN"),
+                    time: now.toLocaleTimeString("en-IN"),
+                    toolCategory: categoryLabels[toolCategory] || toolCategory,
+                    flutes: flutes,
+                    material: substrateMaterial === "hss" ? "HSS (20% Coating Discount applied)" : "Solid Carbide Tool",
+                    coating: COATING_CLEAN_NAMES[coatingType] || coatingType,
+                    coatingCode: coatingType,
+                    diameter: parsedDia,
+                    quantity: parsedQty,
+                    drillAngle: toolCategory === "drill" ? drillAngle : "",
+                    cornerRadius: toolCategory === "radiusendmill" ? cornerRadius : "",
+                    totalLength: coatingType !== "NONE" ? String(parsedLen) : "N/A",
+                    resharpeningTotal: totalResh.toFixed(2),
+                    coatingTotal: totalCoat.toFixed(2),
+                    subtotal: subtotal.toFixed(2),
+                    gst: gst.toFixed(2),
+                    transportCost: transportVal.toFixed(2),
+                    grandTotal: String(grandRounded),
+                    comments: comments.trim()
+                };
+
+                setCalculatedQuote(result);
+            };
+
+            const resetForm = () => {
+                setCustomerName("");
+                setCustomerContact("");
+                setDiameter("");
+                setTotalLength("");
+                setTransportCharges("");
+                setDrillAngle("");
+                setCornerRadius("");
+                setComments("");
+                setQuantity(1);
+                setWorkpieceMaterial("");
+                setShowRec(false);
+                setToolCategory("flatendmill");
+                setCoatingType("NONE");
+                setCalculatedQuote(null);
+                setWarning(null);
+                setSingleStatusShow(false);
+                setConfirmSingleDisabled(false);
+                setConfirmSingleText("✅ Confirm Order");
+            };
+
+            const addToBasket = () => {
+                if (!calculatedQuote) return;
+                const itemWithId = { ...calculatedQuote, id: "basket-" + Date.now() + "-" + Math.random() };
+                setOrderBasket(prev => [...prev, itemWithId]);
+
+                setDiameter("");
+                setTotalLength("");
+                setTransportCharges("");
+                setDrillAngle("");
+                setCornerRadius("");
+                setComments("");
+                setQuantity(1);
+                setToolCategory("flatendmill");
+                setCoatingType("NONE");
+                setCalculatedQuote(null);
+                setWarning(null);
+                setSingleStatusShow(false);
+                setConfirmSingleDisabled(false);
+                setConfirmSingleText("✅ Confirm Order");
+            };
+
+            const removeFromBasket = (id) => {
+                setOrderBasket(prev => prev.filter(item => item.id !== id));
+                setBasketStatusShow(false);
+                setConfirmBasketText("✅ Confirm Full Order");
+                setConfirmBasketDisabled(false);
+            };
+
+            const clearBasket = () => {
+                if (orderBasket.length > 0 && !window.confirm("Clear all " + orderBasket.length + " tool(s) from the basket?")) {
+                    return;
+                }
+                setOrderBasket([]);
+                setBasketStatusShow(false);
+                setConfirmBasketText("✅ Confirm Full Order");
+                setConfirmBasketDisabled(false);
+            };
+
+            // FIXED Google Sheets save for single item: Generates and logs unique orderId
+            const confirmOrder = () => {
+                if (!calculatedQuote) return;
+                setConfirmSingleDisabled(true);
+                setSingleStatusClass("bg-blue-50 text-blue-700 border-l-4 border-blue-500 p-3 rounded-md text-sm mt-3");
+                setSingleStatusText("Saving to Google Sheet...");
+                setSingleStatusShow(true);
+
+                const orderId = "ORD-" + Date.now();
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "text/plain" },
+                    body: JSON.stringify({ ...calculatedQuote, orderId })
+                })
+                .then(() => {
+                    setSingleStatusClass("bg-green-50 text-green-700 border-l-4 border-green-500 p-3 rounded-md text-sm mt-3");
+                    setSingleStatusText("✅ Order saved successfully for " + calculatedQuote.customerName + " (Order ID: " + orderId + ").");
+                    setConfirmSingleText("✅ Confirmed");
+                })
+                .catch(() => {
+                    setSingleStatusClass("bg-red-50 text-red-700 border-l-4 border-red-500 p-3 rounded-md text-sm mt-3");
+                    setSingleStatusText("❌ Could not reach Google Sheet.");
+                    setConfirmSingleDisabled(false);
+                });
+            };
+
+            const confirmFullOrder = () => {
+                if (orderBasket.length === 0) return;
+                setConfirmBasketDisabled(true);
+                setBasketStatusClass("bg-blue-50 text-blue-700 border-l-4 border-blue-500 p-3 rounded-md text-sm mt-3");
+                setBasketStatusText("Saving " + orderBasket.length + " tool(s) to Google Sheet...");
+                setBasketStatusShow(true);
+
+                const orderId = "ORD-" + Date.now();
+                const promises = orderBasket.map(item =>
+                    fetch(GOOGLE_SCRIPT_URL, {
+                        method: "POST",
+                        mode: "no-cors",
+                        headers: { "Content-Type": "text/plain" },
+                        body: JSON.stringify({ ...item, orderId })
+                    })
+                );
+
+                Promise.all(promises)
+                .then(() => {
+                    setBasketStatusClass("bg-green-50 text-green-700 border-l-4 border-green-500 p-3 rounded-md text-sm mt-3");
+                    setBasketStatusText("✅ " + orderBasket.length + " tool(s) saved for " + orderBasket[0].customerName + " (Order: " + orderId + ")");
+                    setConfirmBasketText("✅ Order Confirmed");
+                })
+                .catch(() => {
+                    setBasketStatusClass("bg-red-50 text-red-700 border-l-4 border-red-500 p-3 rounded-md text-sm mt-3");
+                    setBasketStatusText("❌ Could not reach Google Sheet. Please try again.");
+                    setConfirmBasketDisabled(false);
+                });
+            };
+
+            // WhatsApp Share Formatting (Pre-GST totals + "GST extra")
+            const buildQuoteText = (q) => {
+                const subtotalVal = parseFloat(q.subtotal) || 0;
+                const transportVal = parseFloat(q.transportCost) || 0;
+                const totalWithoutGst = subtotalVal + transportVal;
+
+                const lines = [
+                    "*K&S ENGINEERING WORKS*",
+                    "Resharpening & Recoating Quotation",
+                    "",
+                    "Customer : " + q.customerName,
+                    "Date     : " + q.date,
+                    "",
+                    "Tool     : " + q.toolCategory + " (" + q.flutes + " Flutes)",
+                    "Coating  : " + q.coating,
+                    "Diameter : " + q.diameter + " mm",
+                    "Quantity : " + q.quantity
+                ];
+                if (q.drillAngle)   lines.push("Drill Angle   : " + q.drillAngle);
+                if (q.cornerRadius) lines.push("Corner Radius : " + q.cornerRadius);
+                if (q.totalLength !== "N/A") lines.push("Length   : " + q.totalLength + " mm");
+                lines.push("", "Resharpening : ₹" + q.resharpeningTotal);
+                if (parseFloat(q.coatingTotal) > 0) {
+                    lines.push("Coating      : ₹" + q.coatingTotal);
+                }
+                lines.push("Subtotal     : ₹" + q.subtotal);
+                if (transportVal > 0) {
+                    lines.push("Transport    : ₹" + q.transportCost);
+                }
+                lines.push("-----------------------------");
+                lines.push("*Total Amount : ₹" + Math.round(totalWithoutGst) + " +GST*");
+                if (q.comments) lines.push("", "Note : " + q.comments);
+                lines.push("", "Thank you for choosing us!");
+                return lines.join("\n");
+            };
+
+            const buildFullBasketShareText = (basket) => {
+                if (basket.length === 0) return "";
+                const q0 = basket[0];
+                const lines = [
+                    "*K&S ENGINEERING WORKS*",
+                    "Resharpening & Recoating Quotation",
+                    "",
+                    "Customer : " + q0.customerName,
+                    "Date     : " + q0.date,
+                    ""
+                ];
+
+                let orderTotalPreGst = 0;
+                let totalTransport = 0;
+
+                basket.forEach((item, i) => {
+                    lines.push("── Tool " + (i + 1) + ": " + item.toolCategory + " ──");
+                    if (item.drillAngle)   lines.push("  Drill Angle   : " + item.drillAngle);
+                    if (item.cornerRadius) lines.push("  Corner Radius : " + item.cornerRadius);
+                    lines.push("  Coating  : " + item.coating);
+                    lines.push("  Diameter : " + item.diameter + " mm  |  Qty: " + item.quantity);
+                    if (item.totalLength !== "N/A") lines.push("  Length   : " + item.totalLength + " mm");
+                    
+                    const itemPreGst = parseFloat(item.resharpeningTotal) + parseFloat(item.coatingTotal);
+                    lines.push("  Amount   : ₹" + Math.round(itemPreGst));
+                    if (item.comments) lines.push("  Note     : " + item.comments);
+                    lines.push("");
+                    
+                    orderTotalPreGst += itemPreGst;
+                    totalTransport += parseFloat(item.transportCost) || 0;
+                });
+
+                const finalOrderTotalWithoutGst = orderTotalPreGst + totalTransport;
+                if (totalTransport > 0) {
+                    lines.push("Total Transport (No GST): ₹" + Math.round(totalTransport));
+                }
+                lines.push("=============================");
+                lines.push("*Total Order Amount : ₹" + Math.round(finalOrderTotalWithoutGst) + " +GST*");
+                lines.push("", "Thank you for choosing us!");
+                return lines.join("\n");
+            };
+
+            const shareQuote = () => {
+                if (!calculatedQuote) return;
+                const text = buildQuoteText(calculatedQuote);
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        setSingleShareBtnText("✅ Copied! Paste into WhatsApp");
+                        setTimeout(() => { setSingleShareBtnText("📤 Share This Tool Only"); }, 3000);
+                    }).catch(() => {
+                        openShareModal(text);
+                    });
+                } else {
+                    openShareModal(text);
+                }
+            };
+
+            const shareFullOrder = () => {
+                if (orderBasket.length === 0) return;
+                const text = buildFullBasketShareText(orderBasket);
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        setBasketShareBtnText("✅ Copied! Paste into WhatsApp");
+                        setTimeout(() => { setBasketShareBtnText("📤 Share Full Quote"); }, 3000);
+                    }).catch(() => {
+                        openShareModal(text);
+                    });
+                } else {
+                    openShareModal(text);
+                }
+            };
+
+            const openShareModal = (text) => {
+                setPendingShareText(text);
+                setShowShareModal(true);
+            };
+
+            const closeShareModal = () => {
+                setShowShareModal(false);
+            };
+
+            const shareViaSMS = () => {
+                window.location.href = "sms:?body=" + encodeURIComponent(pendingShareText);
+                closeShareModal();
+            };
+
+            const shareViaEmail = () => {
+                window.location.href = "mailto:?subject=Quotation – K%26S Engineering Works&body=" + encodeURIComponent(pendingShareText);
+                closeShareModal();
+            };
+
+            const shareViaCopy = () => {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(pendingShareText).then(() => {
+                        alert("Quote copied to clipboard!");
+                    });
+                } else {
+                    alert("Clipboard copying not supported. Please copy manually.");
+                }
+                closeShareModal();
+            };
+
+            return (
+                <div className="max-w-[500px] mx-auto flex flex-col gap-6">
+                    {/* Header */}
+                    <div className="text-center py-4">
+                        <h1 className="text-2xl font-bold text-slate-800">K&S ENGINEERING WORKS</h1>
+                        <p className="text-xs text-slate-500 font-mono mt-1">Humble & Professional Engineering Tools</p>
+                    </div>
+
+                    {/* Card 1: Which Coating Do I Need? */}
+                    <div className="bg-white p-5 rounded-xl shadow-md border border-slate-100">
+                        <h2 className="text-lg font-semibold text-slate-900 pb-3 border-b border-slate-200 mb-4 flex items-center gap-2">
+                            🎯 Which Coating Do I Need?
+                        </h2>
+                        
+                        <div className="mb-4">
+                            <label className="block mb-1 font-semibold text-sm text-slate-700">Customer Name</label>
+                            <input 
+                                type="text" 
+                                value={customerName} 
+                                onChange={(e) => setCustomerName(e.target.value)} 
+                                placeholder="e.g. Patel Engineering" 
+                                className="w-full p-2.5 border border-slate-300 rounded-md text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block mb-1 font-semibold text-sm text-slate-700">Contact Number</label>
+                            <input 
+                                type="tel" 
+                                value={customerContact} 
+                                onChange={(e) => setCustomerContact(e.target.value)} 
+                                inputMode="tel" 
+                                placeholder="e.g. 9876543210" 
+                                className="w-full p-2.5 border border-slate-300 rounded-md text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block mb-1 font-semibold text-sm text-slate-700">Workpiece Material / Application</label>
+                            <select 
+                                value={workpieceMaterial} 
+                                onChange={(e) => getRecommendation(e.target.value)}
+                                className="w-full p-2.5 border border-slate-300 rounded-md text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">-- Tap to choose workpiece requirement --</option>
+                                <option value="hardened_high">Hardened Steel / High-Temp Alloys (Up to 70 HRC)</option>
+                                <option value="stainless">Stainless Steel / Tough Steels</option>
+                                <option value="aluminium">Aluminium & Alloys (<12% Si) / Copper / Brass</option>
+                                <option value="drilling_steel">General Drilling / Deep-Hole Steel Drilling</option>
+                                <option value="universal">General Purpose / Allrounder (Milling & Turning)</option>
+                                <option value="hardened_drills_reamers">Hardened Steel – Stick Blades / Drills / Reamers (45–72 HRC)</option>
+                            </select>
+                        </div>
+
+                        {showRec && (
+                            <div className="bg-green-50 border-l-4 border-green-500 p-3 rounded-r-md text-sm mt-3">
+                                <div className="font-bold text-green-800 mb-1">{recTitle}</div>
+                                <div className="text-slate-600">{recDesc}</div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Card 2: Quote & Dimension Settings */}
+                    <div className="bg-white p-5 rounded-xl shadow-md border border-slate-100">
+                        <h2 className="text-lg font-semibold text-slate-900 pb-3 border-b border-slate-200 mb-4 flex items-center gap-2">
+                            📐 Quote & Dimension Settings
+                        </h2>
+
+                        {priceStatus.show && (
+                            <div className={`p-3 rounded-md text-xs mb-3 font-mono ${
+                                priceStatus.type === 'loading' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500' :
+                                priceStatus.type === 'success' ? 'bg-green-50 text-green-700 border-l-4 border-green-500' :
+                                'bg-yellow-50 text-yellow-700 border-l-4 border-yellow-500'
+                            }`}>
+                                {priceStatus.text}
+                            </div>
+                        )}
+
+                        <button 
+                            onClick={loadPricesFromSheets}
+                            className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold p-2.5 text-sm rounded-md mb-4 transition"
+                        >
+                            🔄 Refresh Live Prices
+                        </button>
+                        
+                        <div className="mb-4">
+                            <label className="block mb-1 font-semibold text-sm text-slate-700">Tool Category</label>
+                            <select 
+                                value={toolCategory} 
+                                onChange={(e) => setToolCategory(e.target.value)}
+                                className="w-full p-2.5 border border-slate-300 rounded-md text-base bg-white focus:outline-none"
+                            >
+                                <option value="flatendmill">Flat Endmill</option>
+                                <option value="radiusendmill">Radius Endmill</option>
+                                <option value="ballnose">Ball Nose Cutter</option>
+                                <option value="drill">Drill Bit</option>
+                                <option value="chamfer">Chamfering Knife</option>
+                                <option value="chamfernew">Chamfering Knife New (From Round Stock)</option>
+                            </select>
+                        </div>
+                        
+                        <div className="mb-4">
+                            <label className="block mb-1 font-semibold text-sm text-slate-700">Flutes</label>
+                            <select 
+                                value={flutes} 
+                                onChange={(e) => setFlutes(parseInt(e.target.value))}
+                                className="w-full p-2.5 border border-slate-300 rounded-md text-base bg-white focus:outline-none"
+                            >
+                                {getFluteOptions(toolCategory).map(f => (
+                                    <option key={f} value={f}>{f} Flutes</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {toolCategory === "drill" && (
+                            <div className="mb-4">
+                                <label className="block mb-1 font-semibold text-sm text-slate-700">Drill Point Angle</label>
+                                <input 
+                                    type="text" 
+                                    value={drillAngle} 
+                                    onChange={(e) => setDrillAngle(e.target.value)} 
+                                    list="drillAngleList" 
+                                    placeholder="e.g. 118° or type custom angle" 
+                                    className="w-full p-2.5 border border-slate-300 rounded-md text-base bg-white focus:outline-none"
+                                />
+                                <datalist id="drillAngleList">
+                                    <option value="118°">118° — General Purpose</option>
+                                    <option value="135°">135° — Self-Centering / Hard Materials</option>
+                                    <option value="140°">140°</option>
+                                    <option value="150°">150°</option>
+                                    <option value="90°">90° — Countersink</option>
+                                </datalist>
+                            </div>
+                        )}
+
+                        {toolCategory === "radiusendmill" && (
+                            <div className="mb-4">
+                                <label className="block mb-1 font-semibold text-sm text-slate-700">Corner Radius (mm)</label>
+                                <input 
+                                    type="text" 
+                                    value={cornerRadius} 
+                                    onChange={(e) => setCornerRadius(e.target.value)} 
+                                    list="cornerRadiusList" 
+                                    placeholder="e.g. R0.5 or type custom radius" 
+                                    className="w-full p-2.5 border border-slate-300 rounded-md text-base bg-white focus:outline-none"
+                                />
+                                <datalist id="cornerRadiusList">
+                                    <option value="R0.2" />
+                                    <option value="R0.3" />
+                                    <option value="R0.5" />
+                                    <option value="R1.0" />
+                                    <option value="R1.5" />
+                                    <option value="R2.0" />
+                                    <option value="R2.5" />
+                                    <option value="R3.0" />
+                                    <option value="R4.0" />
+                                    <option value="R5.0" />
+                                </datalist>
+                            </div>
+                        )}
+
+                        <div className="mb-4">
+                            <label className="block mb-1 font-semibold text-sm text-slate-700">Tool Substrate Material</label>
+                            <select 
+                                value={substrateMaterial} 
+                                onChange={(e) => setSubstrateMaterial(e.target.value)}
+                                className="w-full p-2.5 border border-slate-300 rounded-md text-base bg-white focus:outline-none"
+                            >
+                                <option value="carbide">Solid Carbide Tool</option>
+                                <option value="hss">HSS (20% Coating Discount applied)</option>
+                            </select>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block mb-1 font-semibold text-sm text-slate-700">Coating Layer Selection</label>
+                            <select 
+                                value={coatingType} 
+                                onChange={(e) => setCoatingType(e.target.value)}
+                                className="w-full p-2.5 border border-slate-300 rounded-md text-base bg-white focus:outline-none"
+                            >
+                                <option value="NONE">No Coating (Resharpening Only)</option>
+                                <option value="ALCRONA_PRO">BALINIT ALCRONA PRO (Base Rate)</option>
+                                <option value="ALCRONA_EVO">BALINIT ALCRONA EVO (Base Rate)</option>
+                                <option value="HARD_CARBON">BALINIT HARD CARBON (1.3x Rate)</option>
+                                <option value="MAYURA">BALINIT MAYURA (1.3x Rate)</option>
+                                <option value="DURANA">BALINIT DURANA (1.3x Rate)</option>
+                                <option value="OPTURA">BALINIT OPTURA (1.3x Rate)</option>
+                                <option value="TISINOS_PRO">BALIQ TISINOS PRO (1.85x Rate)</option>
+                            </select>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 mb-4">
+                            <div>
+                                <label className="block mb-1 font-semibold text-sm text-slate-700">Diameter (mm)</label>
+                                <input 
+                                    type="number" 
+                                    value={diameter} 
+                                    onChange={(e) => setDiameter(e.target.value)} 
+                                    inputMode="decimal" 
+                                    placeholder="e.g. 12" 
+                                    step="any" 
+                                    min="3" 
+                                    max="20" 
+                                    className="w-full p-2.5 border border-slate-300 rounded-md text-base bg-white focus:outline-none"
+                                />
+                            </div>
+                            <div>
+                                <label className="block mb-1 font-semibold text-sm text-slate-700">Quantity</label>
+                                <input 
+                                    type="number" 
+                                    value={quantity} 
+                                    onChange={(e) => setQuantity(parseInt(e.target.value) || 1)} 
+                                    inputMode="numeric" 
+                                    placeholder="e.g. 1" 
+                                    step="1" 
+                                    min="1" 
+                                    className="w-full p-2.5 border border-slate-300 rounded-md text-base bg-white focus:outline-none"
+                                />
+                            </div>
+                        </div>
+
+                        {coatingType !== "NONE" && (
+                            <div className="mb-4">
+                                <label className="block mb-1 font-semibold text-sm text-slate-700">Total Length (mm)</label>
+                                <input 
+                                    type="number" 
+                                    value={totalLength} 
+                                    onChange={(e) => setTotalLength(e.target.value)} 
+                                    inputMode="decimal" 
+                                    placeholder="e.g. 75" 
+                                    step="any" 
+                                    min="1" 
+                                    className="w-full p-2.5 border border-slate-300 rounded-md text-base bg-white focus:outline-none"
+                                />
+                            </div>
+                        )}
+
+                        <div className="mb-4">
+                            <label className="block mb-1 font-semibold text-sm text-slate-700">Transportation Charges</label>
+                            <input 
+                                type="number" 
+                                value={transportCharges} 
+                                onChange={(e) => setTransportCharges(e.target.value)} 
+                                inputMode="decimal" 
+                                placeholder="e.g. 100 (leave blank if none)" 
+                                step="any" 
+                                min="0" 
+                                className="w-full p-2.5 border border-slate-300 rounded-md text-base bg-white focus:outline-none"
+                            />
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block mb-1 font-semibold text-sm text-slate-700">Comments / Special Instructions</label>
+                            <textarea 
+                                value={comments} 
+                                onChange={(e) => setComments(e.target.value)} 
+                                rows={3} 
+                                placeholder="e.g. chipped edge on flute, urgent delivery..." 
+                                className="w-full p-2.5 border border-slate-300 rounded-md text-base bg-white focus:outline-none font-sans"
+                            />
+                        </div>
+
+                        {warning && (
+                            <div className="bg-red-50 border-l-4 border-red-500 text-red-800 p-3 rounded-r-md text-sm mb-4">
+                                {warning}
+                            </div>
+                        )}
+
+                        <button 
+                            onClick={calculateQuote}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-3.5 rounded-lg transition text-lg shadow-sm"
+                        >
+                            Calculate Invoice Price
+                        </button>
+                        
+                        <button 
+                            onClick={resetForm}
+                            className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold p-3 rounded-lg mt-3 transition text-base"
+                        >
+                            ↺ Reset / New Quote
+                        </button>
+                        
+                        {calculatedQuote && (
+                            <div className="mt-6 border-t border-slate-200 pt-5">
+                                <button 
+                                    onClick={shareQuote}
+                                    className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold p-3 rounded-lg transition mb-2"
+                                >
+                                    {singleShareBtnText}
+                                </button>
+                                
+                                <button 
+                                    onClick={addToBasket}
+                                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold p-3 rounded-lg transition mb-4"
+                                >
+                                    ➕ Add to Order Basket
+                                </button>
+                                
+                                {/* Calculations UI Card */}
+                                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-md">
+                                    <div className="flex justify-between text-xs text-slate-500 mb-2">
+                                        <span>Quantity:</span>
+                                        <span className="font-semibold">{calculatedQuote.quantity} units</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm mb-2 text-slate-700">
+                                        <span>Resharpening (Total):</span>
+                                        <span>₹{calculatedQuote.resharpeningTotal}</span>
+                                    </div>
+                                    {calculatedQuote.coatingCode !== "NONE" && (
+                                        <React.Fragment>
+                                            <div className="flex justify-between text-xs text-slate-500 mb-1 pl-3">
+                                                <span>• Coating Unit Rate:</span>
+                                                <span>₹{(parseFloat(calculatedQuote.coatingTotal) / calculatedQuote.quantity).toFixed(2)}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm mb-2 text-slate-700 pl-3">
+                                                <span>• Coating Fee (Total):</span>
+                                                <span>₹{calculatedQuote.coatingTotal}</span>
+                                            </div>
+                                        </React.Fragment>
+                                    )}
+                                    <div className="flex justify-between text-base font-bold text-slate-900 border-t border-dashed border-slate-300 pt-2 mt-2">
+                                        <span>Subtotal Amount:</span>
+                                        <span>₹{calculatedQuote.subtotal}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm text-slate-700 mt-2">
+                                        <span>GST (18%):</span>
+                                        <span>₹{calculatedQuote.gst}</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs text-slate-500 mt-1">
+                                        <span>Transportation (No GST):</span>
+                                        <span>₹{calculatedQuote.transportCost}</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs text-slate-500 mt-1">
+                                        <span>Round Off Adjust:</span>
+                                        <span>
+                                            {(() => {
+                                                const subtotalVal = parseFloat(calculatedQuote.subtotal) || 0;
+                                                const gstVal = parseFloat(calculatedQuote.gst) || 0;
+                                                const transportVal = parseFloat(calculatedQuote.transportCost) || 0;
+                                                const grandRaw = subtotalVal + gstVal + transportVal;
+                                                const grandRounded = Math.round(grandRaw);
+                                                const diff = grandRounded - grandRaw;
+                                                return (diff >= 0 ? "+₹" : "-₹") + Math.abs(diff).toFixed(2);
+                                            })()}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between text-xl font-bold text-slate-900 border-t-2 border-slate-300 pt-2 mt-3 font-sans">
+                                        <span>Total Grand Bill:</span>
+                                        <span className="text-slate-950">₹{calculatedQuote.grandTotal}</span>
+                                    </div>
+                                </div>
+
+                                <button 
+                                    disabled={confirmSingleDisabled} 
+                                    onClick={confirmOrder}
+                                    className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-300 disabled:cursor-not-allowed text-white font-bold p-3.5 rounded-lg transition mt-4 text-base shadow"
+                                >
+                                    {confirmSingleText}
+                                </button>
+                            </div>
+                        )}
+
+                        {singleStatusShow && (
+                            <div className={singleStatusClass}>
+                                {singleStatusText}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Card 3: Order Basket */}
+                    {orderBasket.length > 0 && (
+                        <div className="bg-white p-5 rounded-xl shadow-md border border-slate-100">
+                            <h2 className="text-lg font-semibold text-slate-900 pb-3 border-b border-slate-200 mb-4 flex items-center gap-2">
+                                🛒 Order Basket
+                            </h2>
+                            <div className="flex flex-col gap-3">
+                                {orderBasket.map((item, i) => {
+                                    const label = item.toolCategory + (item.drillAngle ? " " + item.drillAngle : "") + (item.cornerRadius ? " " + item.cornerRadius : "");
+                                    const detail = "⌀" + item.diameter + "mm × " + item.quantity + " | " + item.coating;
+                                    return (
+                                        <div key={item.id || i} className="flex justify-between items-center p-3 border border-slate-200 rounded-lg text-sm bg-slate-50">
+                                            <div className="flex-1 pr-3">
+                                                <strong className="block text-slate-800">{label}</strong>
+                                                <span className="text-xs text-slate-500 font-mono">{detail}</span>
+                                            </div>
+                                            <div className="font-bold text-blue-700 mr-3">₹{item.grandTotal}</div>
+                                            <button 
+                                                onClick={() => removeFromBasket(item.id)}
+                                                className="bg-red-500 hover:bg-red-600 text-white rounded p-1.5 px-2.5 text-xs font-bold transition"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="bg-slate-100 rounded-lg p-3.5 mt-4">
+                                <div className="text-xs text-slate-500 mb-1">
+                                    {orderBasket.length} tool(s) registered for {orderBasket[0].customerName}
+                                </div>
+                                <div className="flex justify-between text-lg font-bold text-slate-950 border-t border-slate-300 pt-2 mt-1">
+                                    <span>Order Grand Total:</span>
+                                    <span>₹{Math.round(orderBasket.reduce((sum, item) => sum + parseFloat(item.grandTotal), 0))}</span>
+                                </div>
+                            </div>
+                            
+                            <button 
+                                disabled={confirmBasketDisabled} 
+                                onClick={confirmFullOrder}
+                                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-300 disabled:cursor-not-allowed text-white font-bold p-3.5 rounded-lg transition mt-4 text-base shadow"
+                            >
+                                {confirmBasketText}
+                            </button>
+                            
+                            <button 
+                                onClick={shareFullOrder}
+                                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold p-3 rounded-lg transition mt-2.5"
+                            >
+                                {basketShareBtnText}
+                            </button>
+                            
+                            <button 
+                                onClick={clearBasket}
+                                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold p-2.5 rounded-lg mt-3 text-sm"
+                            >
+                                🗑 Clear Basket
+                            </button>
+                            
+                            {basketStatusShow && (
+                                <div className={basketStatusClass}>
+                                    {basketStatusText}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Share Modal Backdrop */}
+                    {showShareModal && (
+                        <div 
+                            onClick={closeShareModal}
+                            className="fixed inset-0 bg-black/50 z-[1000] flex items-end sm:items-center justify-center p-4 transition-all duration-300"
+                        >
+                            <div 
+                                onClick={(e) => e.stopPropagation()}
+                                className="bg-white w-full max-w-[450px] rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl border border-slate-100 flex flex-col gap-2.5 animate-in slide-in-from-bottom"
+                            >
+                                <h3 className="text-base font-bold text-slate-800 text-center border-b border-slate-150 pb-2.5 mb-2">Share Quote Via</h3>
+                                <button onClick={shareViaSMS} className="w-full text-left p-3.5 hover:bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium">💬 SMS / Messages</button>
+                                <button onClick={shareViaEmail} className="w-full text-left p-3.5 hover:bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium">📧 Email</button>
+                                <button onClick={shareViaCopy} className="w-full text-left p-3.5 hover:bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium">📋 Copy Text</button>
+                                <button onClick={closeShareModal} className="w-full text-center p-3 hover:bg-slate-100 font-bold text-slate-500 rounded-lg mt-2">Cancel</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
         }
-        if (data.coating) {
-            coatingLengths   = data.coating.lengths;
-            coatingBasePrices = data.coating.prices;
-            coatingDiameters  = Object.keys(data.coating.prices).map(Number).sort((a, b) => a - b);
-            localStorage.setItem(CACHE_KEY_COATING, JSON.stringify({ diameters: coatingDiameters, lengths: coatingLengths, prices: coatingBasePrices, savedAt: Date.now() }));
-        }
-        statusEl.className = "price-status success";
-        statusEl.innerText = "✅ Prices loaded (last updated: " + (data.lastUpdated || "recently") + ")";
-        return;
-    } catch (err) { console.warn("prices.json fetch failed:", err.message); }
 
-    const cachedResh = localStorage.getItem(CACHE_KEY_RESHARPENING);
-    const cachedCoat = localStorage.getItem(CACHE_KEY_COATING);
-    if (cachedResh && cachedCoat) {
-        RESHARPENING_TABLE = JSON.parse(cachedResh).table;
-        const p = JSON.parse(cachedCoat);
-        coatingDiameters = p.diameters; coatingLengths = p.lengths; coatingBasePrices = p.prices;
-        statusEl.className = "price-status warning";
-        statusEl.innerText = "⚠ Using last saved prices (" + new Date(JSON.parse(cachedCoat).savedAt).toLocaleString("en-IN") + ").";
-    } else {
-        statusEl.className = "price-status warning";
-        statusEl.innerText = "⚠ Cannot reach prices.json. Using built-in prices. Tap Refresh when online to load latest.";
-    }
-}
-
-function getRecommendation() {
-    const material = document.getElementById("workpieceMaterial").value;
-    const recDisplay = document.getElementById("recDisplay");
-    if (!material) { recDisplay.style.display = "none"; return; }
-    const map = {
-        hardened_high:          ["⭐ BALIQ TISINOS PRO",    "Best for hard machining up to 70 HRC and high-temp alloys.",                          "TISINOS_PRO"],
-        stainless:              ["⭐ BALIQ TISINOS PRO",    "Ideal for stainless steel. For general milling, ALCRONA EVO is a solid alternative.", "TISINOS_PRO"],
-        aluminium:              ["⭐ BALINIT MAYURA (ta-C)","Smooth carbon prevents adhesion on Aluminium (<12% Si), Copper, Brass, Polymers.",    "MAYURA"],
-        drilling_steel:         ["⭐ BALINIT OPTURA",       "Engineered for steel/cast iron drilling. Multilayer design optimizes wear.",            "OPTURA"],
-        universal:              ["⭐ BALINIT ALCRONA EVO",  "3rd-generation allrounder — >30% better performance than ALCRONA PRO.",               "ALCRONA_EVO"],
-        hardened_drills_reamers:["⭐ BALINIT DURANA",       "For stick blades, drills and reamers in hardened steel 45–72 HRC.",                    "DURANA"]
-    };
-    const rec = map[material]; if (!rec) return;
-    document.getElementById("recTargetCoating").innerText = rec[0];
-    document.getElementById("recDescription").innerText   = rec[1];
-    document.getElementById("coatingType").value          = rec[2];
-    recDisplay.style.display = "block";
-    toggleLengthInput();
-}
-
-function getResharpeningPrice(category, flutes, dia) {
-    const d = Math.ceil(dia);
-    if (RESHARPENING_TABLE[category]) {
-        const fd = RESHARPENING_TABLE[category][flutes] || RESHARPENING_TABLE[category][String(flutes)];
-        if (fd) {
-            const dias = Object.keys(fd).map(Number).sort((a, b) => a - b);
-            const m = dias.find(d2 => d2 >= d);
-            return Number(m !== undefined ? fd[m] : fd[dias[dias.length - 1]]);
-        }
-    }
-    if (category === "flatendmill" || category === "radiusendmill")
-        return flutes <= 3 ? (d<=6?50:d<=12?70:d<=16?100:160) : (d<=6?55:d<=12?75:d<=16?110:170);
-    if (category === "ballnose") return d<=6?60:d<=12?80:d<=16?110:170;
-    if (category === "drill")    return flutes<=2?(d<=4?20:d<=8?30:d<=14?40:50):(d<=4?40:d<=8?50:d<=14?60:70);
-    if (category === "chamfer")  return flutes===2?(d<=10?30:40):(d<=10?40:50);
-    if (category === "chamfernew") return flutes===2?(d<=8?80:d<=13?100:d<=18?150:180):(d<=8?100:d<=13?120:200);
-    return 0;
-}
-
-function updateFluteOptions() {
-    const cat = document.getElementById("toolCategory").value;
-    const sel = document.getElementById("flutes"); const prev = sel.value; sel.innerHTML = "";
-    let opts = [2,3,4,5,6];
-    if (cat==="ballnose") opts=[2,3,4];
-    else if (cat==="drill") opts=[2,3];
-    else if (cat==="chamfer" || cat==="chamfernew") opts=[2,3];
-    opts.forEach(f => { const o=document.createElement("option"); o.value=f; o.innerText=f+" Flutes"; sel.appendChild(o); });
-    if (opts.includes(parseInt(prev))) sel.value = prev;
-
-    document.getElementById("drillAngleGroup").style.display   = cat === "drill"         ? "block" : "none";
-    document.getElementById("cornerRadiusGroup").style.display = cat === "radiusendmill"  ? "block" : "none";
-}
-
-function toggleLengthInput() {
-    document.getElementById("lengthGroup").style.display = document.getElementById("coatingType").value==="NONE"?"none":"block";
-}
-
-function calculateQuote() {
-    const cat=document.getElementById("toolCategory").value, flutes=parseInt(document.getElementById("flutes").value||2);
-    const material=document.getElementById("material").value, coating=document.getElementById("coatingType").value;
-    const inputDia=parseFloat(document.getElementById("diameter").value);
-    const inputLen=parseFloat(document.getElementById("length").value);
-    const inputQty=parseInt(document.getElementById("quantity").value);
-    const lw=document.getElementById("limitWarning");
-
-    lw.style.display="none";
-    document.getElementById("confirmBtn").style.display="none";
-    document.getElementById("addBasketBtn").style.display="none";
-    document.getElementById("shareBtn").style.display="none";
-    lastQuoteData=null;
-
-    if (isNaN(inputDia)) { alert("Please enter a valid diameter."); return; }
-    if (coating!=="NONE"&&isNaN(inputLen)) { alert("Please enter the tool length for coating."); return; }
-    if (isNaN(inputQty)||inputQty<1) { alert("Please enter a valid quantity (minimum 1)."); return; }
-    if (inputDia>MAX_RESHARPEN_DIA) {
-        lw.innerText="⚠ Diameter exceeds machine capacity (max "+MAX_RESHARPEN_DIA+"mm).";
-        lw.style.display="block"; document.getElementById("results").style.display="none"; return;
-    }
-
-    const resharpeningUnit=getResharpeningPrice(cat,flutes,inputDia);
-    let baseCoatingCost=0, modifiedCoatingUnit=0;
-
-    if (coating!=="NONE") {
-        const diaSlab=coatingDiameters.find(d=>d>=inputDia)||coatingDiameters[coatingDiameters.length-1];
-        const lenSlab=coatingLengths.find(l=>l>=inputLen)||coatingLengths[coatingLengths.length-1];
-        const lenIdx=coatingLengths.indexOf(lenSlab);
-        const priceRow=coatingBasePrices[diaSlab]||coatingBasePrices[String(diaSlab)];
-        baseCoatingCost=priceRow?priceRow[lenIdx]:0;
-        let mult=1.0;
-        if (["HARD_CARBON","MAYURA","DURANA","OPTURA"].includes(coating)) mult=1.30;
-        else if (coating==="TISINOS_PRO") mult=1.85;
-        modifiedCoatingUnit=baseCoatingCost*mult*(material==="hss"?0.80:1.0);
-        document.getElementById("coatBaseRow").style.display="flex";
-        document.getElementById("coatFinalRow").style.display="flex";
-    } else {
-        document.getElementById("coatBaseRow").style.display="none";
-        document.getElementById("coatFinalRow").style.display="none";
-    }
-
-    const totalResh=resharpeningUnit*inputQty, totalCoat=modifiedCoatingUnit*inputQty;
-    const transport=parseFloat(document.getElementById("transport").value)||0;
-    const subtotal=totalResh+totalCoat, gst=subtotal*0.18;
-    const grandRaw=subtotal+gst+transport, grandRounded=Math.round(grandRaw);
-    const roundOff=grandRounded-grandRaw;
-
-    document.getElementById("qtyDisplay").innerText=""+inputQty;
-    document.getElementById("resCost").innerText="₹"+totalResh.toFixed(2);
-    document.getElementById("coatBase").innerText="₹"+baseCoatingCost.toFixed(2);
-    document.getElementById("coatFinal").innerText="₹"+totalCoat.toFixed(2);
-    document.getElementById("subtotal").innerText="₹"+subtotal.toFixed(2);
-    document.getElementById("gst").innerText="₹"+gst.toFixed(2);
-    document.getElementById("transportDisplay").innerText="₹"+transport.toFixed(2);
-    document.getElementById("roundOff").innerText=(roundOff>=0?"+₹":"-₹")+Math.abs(roundOff).toFixed(2);
-    document.getElementById("grandTotal").innerText="₹"+grandRounded.toFixed(2);
-    document.getElementById("results").style.display="block";
-
-    const now=new Date();
-    
-    // Friendly UI Category labels
-    const categoryLabels = {
-        flatendmill: "Flat Endmill",
-        radiusendmill: "Radius Endmill",
-        ballnose: "Ball Nose Cutter",
-        drill: "Drill Bit",
-        chamfer: "Chamfering Knife",
-        chamfernew: "Chamfering Knife New"
-    };
-
-    lastQuoteData={
-        customerName: document.getElementById("customerName").value.trim()||"(No name)",
-        customerContact: document.getElementById("customerContact").value.trim()||"(No contact)",
-        date: now.toLocaleDateString("en-IN"), time: now.toLocaleTimeString("en-IN"),
-        toolCategory: categoryLabels[cat] || cat,
-        flutes: flutes,
-        material: document.getElementById("material").options[document.getElementById("material").selectedIndex].text,
-        coating: COATING_CLEAN_NAMES[coating]||coating,
-        coatingCode: coating, diameter: inputDia, quantity: inputQty,
-        drillAngle:  cat === "drill"         ? document.getElementById("drillAngle").value  : "",
-        cornerRadius:cat === "radiusendmill"  ? document.getElementById("cornerRadius").value : "",
-        totalLength: coating!=="NONE"?inputLen:"N/A",
-        resharpeningTotal: totalResh.toFixed(2), coatingTotal: totalCoat.toFixed(2),
-        subtotal: subtotal.toFixed(2), gst: gst.toFixed(2),
-        transportCost: transport.toFixed(2), grandTotal: grandRounded.toFixed(2),
-        comments: document.getElementById("comments").value.trim()
-    };
-    
-    document.getElementById("confirmBtn").style.display  = "block";
-    document.getElementById("addBasketBtn").style.display = "block";
-    document.getElementById("shareBtn").style.display     = "block";
-}
-
-// WhatsApp Quote String Builder with pre-GST values and "+ GST" label
-function buildQuoteText() {
-    const q=lastQuoteData;
-    const subtotalVal = parseFloat(q.subtotal) || 0;
-    const transportVal = parseFloat(q.transportCost) || 0;
-    const totalWithoutGst = subtotalVal + transportVal;
-
-    const lines=["*K&S ENGINEERING WORKS*","Resharpening & Recoating Quotation","",
-        "Customer : "+q.customerName,"Date     : "+q.date,"",
-        "Tool     : "+q.toolCategory+" ("+q.flutes+" Flutes)",
-        "Coating  : "+q.coating,"Diameter : "+q.diameter+" mm","Quantity : "+q.quantity];
-    if (q.drillAngle)   lines.push("Drill Angle   : "+q.drillAngle);
-    if (q.cornerRadius) lines.push("Corner Radius : "+q.cornerRadius);
-    if (q.totalLength!=="N/A") lines.push("Length   : "+q.totalLength+" mm");
-    lines.push("","Resharpening : ₹"+q.resharpeningTotal);
-    if (parseFloat(q.coatingTotal)>0) lines.push("Coating      : ₹"+q.coatingTotal);
-    lines.push("Subtotal     : ₹"+q.subtotal);
-    if (transportVal>0) lines.push("Transport    : ₹"+q.transportCost);
-    lines.push("-----------------------------","*Total Amount : ₹"+Math.round(totalWithoutGst)+" + GST*");
-    if (q.comments) lines.push("","Note : "+q.comments);
-    lines.push("","Thank you for choosing us!");
-    return lines.join("\n");
-}
-
-function shareQuote() {
-    if (!lastQuoteData) return;
-    const text = buildQuoteText();
-    if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(() => {
-            const btn = document.getElementById("shareBtn");
-            const orig = btn.innerText;
-            btn.innerText = "✅ Copied! Paste into WhatsApp";
-            setTimeout(() => { btn.innerText = orig; }, 3000);
-        }).catch(() => { openShareModal(text); });
-    } else { openShareModal(text); }
-}
-
-function openShareModal(text) { pendingShareText=text; document.getElementById("shareModalBackdrop").classList.add("visible"); }
-function closeShareModal()    { document.getElementById("shareModalBackdrop").classList.remove("visible"); }
-function shareViaSMS()        { window.location.href="sms:?body="+encodeURIComponent(pendingShareText); closeShareModal(); }
-function shareViaEmail()      { window.location.href="mailto:?subject=Quotation – K%26S Engineering Works&body="+encodeURIComponent(pendingShareText); closeShareModal(); }
-function shareViaCopy()       { navigator.clipboard.writeText(pendingShareText).then(()=>alert("Quote copied to clipboard!")); closeShareModal(); }
-
-function confirmOrder() {
-    if (!lastQuoteData) return;
-    const btn=document.getElementById("confirmBtn"), status=document.getElementById("sheetStatus");
-    btn.disabled=true; status.className="sheet-status sending"; status.innerText="Saving to Google Sheet..."; status.style.display="block";
-    fetch(GOOGLE_SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify(lastQuoteData)})
-        .then(()=>{status.className="sheet-status success"; status.innerText="✅ Order saved for "+lastQuoteData.customerName+"."; btn.innerText="✅ Confirmed";})
-        .catch(()=>{status.className="sheet-status error"; status.innerText="❌ Could not reach Google Sheet."; btn.disabled=false;});
-}
-
-function resetForm() {
-    ["customerName","customerContact","diameter","length","transport","drillAngle","cornerRadius","comments"].forEach(id=>document.getElementById(id).value="");
-    document.getElementById("quantity").value="1";
-    document.getElementById("workpieceMaterial").value="";
-    document.getElementById("recDisplay").style.display="none";
-    document.getElementById("toolCategory").value="flatendmill"; updateFluteOptions();
-    document.getElementById("coatingType").value="NONE"; toggleLengthInput();
-    document.getElementById("results").style.display="none";
-    document.getElementById("limitWarning").style.display="none";
-    document.getElementById("confirmBtn").style.display="none";
-    document.getElementById("addBasketBtn").style.display="none";
-    document.getElementById("shareBtn").style.display="none";
-    document.getElementById("sheetStatus").style.display="none";
-    const btn=document.getElementById("confirmBtn"); btn.disabled=false; btn.innerText="✅ Confirm Order";
-    lastQuoteData=null;
-}
-
-function addToBasket() {
-    if (!lastQuoteData) return;
-    orderBasket.push(Object.assign({}, lastQuoteData));
-    renderBasket();
-
-    // Clear tool-specific input fields only, keep client data
-    ["diameter","length","transport","drillAngle","cornerRadius","comments"].forEach(id => document.getElementById(id).value = "");
-    document.getElementById("quantity").value = "1";
-    document.getElementById("toolCategory").value = "flatendmill"; updateFluteOptions();
-    document.getElementById("coatingType").value = "NONE"; toggleLengthInput();
-    document.getElementById("results").style.display = "none";
-    document.getElementById("limitWarning").style.display = "none";
-    document.getElementById("confirmBtn").style.display = "none";
-    document.getElementById("addBasketBtn").style.display = "none";
-    document.getElementById("shareBtn").style.display = "none";
-    document.getElementById("sheetStatus").style.display = "none";
-    lastQuoteData = null;
-}
-
-function renderBasket() {
-    const card = document.getElementById("basketCard");
-    const itemsDiv = document.getElementById("basketItems");
-    const summaryDiv = document.getElementById("basketSummary");
-
-    if (orderBasket.length === 0) { card.style.display = "none"; return; }
-    card.style.display = "block";
-
-    itemsDiv.innerHTML = orderBasket.map((item, i) => {
-        const label = item.toolCategory + (item.drillAngle ? " " + item.drillAngle : "") + (item.cornerRadius ? " " + item.cornerRadius : "");
-        const detail = "⌀" + item.diameter + "mm × " + item.quantity + " | " + item.coating;
-        return '<div class="basket-item">' +
-            '<div class="basket-item-info"><strong>' + label + '</strong><span>' + detail + '</span></div>' +
-            '<div class="basket-item-price">₹' + item.grandTotal + '</div>' +
-            '<button class="basket-remove" onclick="removeFromBasket(' + i + ')">✕</button>' +
-            '</div>';
-    }).join("");
-
-    const orderTotal = orderBasket.reduce((sum, item) => sum + parseFloat(item.grandTotal), 0);
-    const customer = orderBasket[0].customerName;
-    summaryDiv.innerHTML =
-        '<div style="font-size:13px;color:#718096;margin-bottom:6px;">' + orderBasket.length + ' tool(s) for ' + customer + '</div>' +
-        '<div class="total-line"><span>Order Total (Inc. GST):</span><span>₹' + Math.round(orderTotal) + '</span></div>';
-    
-    // Reset basket order button labels
-    const btn = document.getElementById("confirmBasketBtn");
-    btn.disabled = false; btn.innerText = "✅ Confirm Full Order";
-}
-
-function removeFromBasket(index) {
-    orderBasket.splice(index, 1);
-    renderBasket();
-}
-
-function clearBasket() {
-    if (orderBasket.length > 0 && !confirm("Clear all " + orderBasket.length + " tool(s) from the basket?")) return;
-    orderBasket = [];
-    renderBasket();
-    document.getElementById("basketStatus").style.display = "none";
-}
-
-function confirmFullOrder() {
-    if (orderBasket.length === 0) return;
-    const btn = document.getElementById("confirmBasketBtn");
-    const status = document.getElementById("basketStatus");
-    btn.disabled = true; status.className = "sheet-status sending";
-    status.innerText = "Saving " + orderBasket.length + " tool(s) to Google Sheet...";
-    status.style.display = "block";
-
-    const orderId = "ORD-" + Date.now();
-    const promises = orderBasket.map(item =>
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: "POST", mode: "no-cors",
-            headers: { "Content-Type": "text/plain" },
-            body: JSON.stringify(Object.assign({}, item, { orderId }))
-        })
-    );
-    Promise.all(promises)
-        .then(() => {
-            status.className = "sheet-status success";
-            status.innerText = "✅ " + orderBasket.length + " tool(s) saved for " + orderBasket[0].customerName + " (Order: " + orderId + ")";
-            btn.innerText = "✅ Order Confirmed";
-        })
-        .catch(() => {
-            status.className = "sheet-status error";
-            status.innerText = "❌ Could not reach Google Sheet. Please try again.";
-            btn.disabled = false;
-        });
-}
-
-// WhatsApp Basket Quote Builder with pre-GST values and "+ GST" label
-function shareFullOrder() {
-    if (orderBasket.length === 0) return;
-    const q0 = orderBasket[0];
-    const lines = ["*K&S ENGINEERING WORKS*", "Resharpening & Recoating Quotation", "",
-        "Customer : " + q0.customerName, "Date     : " + q0.date, ""];
-
-    let orderTotalPreGst = 0;
-    let totalTransport = 0;
-    
-    orderBasket.forEach((item, i) => {
-        const itemResh = parseFloat(item.resharpeningTotal) || 0;
-        const itemCoat = parseFloat(item.coatingTotal) || 0;
-        const itemPreGst = itemResh + itemCoat;
-
-        lines.push("── Tool " + (i + 1) + ": " + item.toolCategory + " ──");
-        if (item.drillAngle)   lines.push("  Drill Angle   : " + item.drillAngle);
-        if (item.cornerRadius) lines.push("  Corner Radius : " + item.cornerRadius);
-        lines.push("  Coating  : " + item.coating);
-        lines.push("  Diameter : " + item.diameter + " mm  |  Qty: " + item.quantity);
-        if (item.totalLength !== "N/A") lines.push("  Length   : " + item.totalLength + " mm");
-        lines.push("  Amount   : ₹" + Math.round(itemPreGst));
-        if (item.comments) lines.push("  Note     : " + item.comments);
-        lines.push("");
-
-        orderTotalPreGst += itemPreGst;
-        totalTransport += parseFloat(item.transportCost) || 0;
-    });
-
-    const finalOrderTotalWithoutGst = orderTotalPreGst + totalTransport;
-
-    if (totalTransport > 0) {
-        lines.push("Total Transport (No GST): ₹" + Math.round(totalTransport));
-    }
-
-    lines.push("=============================");
-    lines.push("*Total Order Amount : ₹" + Math.round(finalOrderTotalWithoutGst) + " + GST*");
-    lines.push("", "Thank you for choosing us!");
-
-    const text = lines.join("\n");
-    if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(() => {
-            const btn = document.querySelector("#basketCard .share-button");
-            const orig = btn.innerText;
-            btn.innerText = "✅ Copied! Paste into WhatsApp";
-            setTimeout(() => { btn.innerText = orig; }, 3000);
-        }).catch(() => openShareModal(text));
-    } else { openShareModal(text); }
-}
-
-updateFluteOptions();
-toggleLengthInput();
-loadPricesFromSheets();
-</script>
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
